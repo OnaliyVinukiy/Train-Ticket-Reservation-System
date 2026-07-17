@@ -3,6 +3,7 @@ namespace TrainTicket.API.Repositories;
 public class MemoryRepository<T> : IRepository<T>
 {
     private readonly List<T> items = new();
+    private int nextId = 1;
 
 
     public IEnumerable<T> GetAll()
@@ -25,6 +26,15 @@ public class MemoryRepository<T> : IRepository<T>
 
     public void Add(T entity)
     {
+        var property = entity!
+            .GetType()
+            .GetProperty("Id");
+
+        if (property != null)
+        {
+            property.SetValue(entity, nextId++);
+        }
+
         items.Add(entity);
     }
 
