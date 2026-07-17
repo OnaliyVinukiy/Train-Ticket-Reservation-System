@@ -10,7 +10,11 @@ builder.Services.AddControllers();
 
 builder.Services.AddSingleton<IRepository<Booking>, MemoryRepository<Booking>>();
 
+builder.Services.AddSingleton<IRepository<Schedule>, MemoryRepository<Schedule>>();
+
 builder.Services.AddSingleton<BookingService>();
+
+builder.Services.AddSingleton<ScheduleService>();
 
 builder.Services.AddEndpointsApiExplorer();
 
