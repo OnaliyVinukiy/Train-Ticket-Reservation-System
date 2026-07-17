@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using TrainTicket.API.Models;
-using TrainTicket.API.Repositories;
+using TrainTicket.API.Services;
 
 
 namespace TrainTicket.API.Controllers;
@@ -11,40 +11,70 @@ namespace TrainTicket.API.Controllers;
 public class BookingController : ControllerBase
 {
 
-    private readonly IRepository<Booking> repository;
+    private readonly BookingService service;
 
 
-    public BookingController(
-        IRepository<Booking> repository)
+    public BookingController(BookingService service)
     {
-        this.repository = repository;
+        this.service = service;
     }
-
 
 
     [HttpGet]
     public IActionResult GetBookings()
     {
-        return Ok(repository.GetAll());
+        return Ok(service.GetAllBookings());
     }
 
 
-
-    [HttpPost]
-    public IActionResult CreateBooking(
-        Booking booking)
+    [HttpGet("{id}")]
+    public IActionResult GetBooking(int id)
     {
-        repository.Add(booking);
+        var booking = service.GetBookingById(id);
+
+
+        if (booking == null)
+        {
+            return NotFound();
+        }
+
 
         return Ok(booking);
     }
 
 
 
+    [HttpPost]
+    public IActionResult CreateBooking(Booking booking)
+    {
+        var created = service.CreateBooking(booking);
+
+        return Ok(created);
+    }
+
+
+    [HttpPut("{id}")]
+    public IActionResult UpdateBooking(
+        int id,
+        Booking booking)
+    {
+
+        if (id != booking.Id)
+        {
+            return BadRequest();
+        }
+
+
+        service.UpdateBooking(booking);
+
+        return NoContent();
+    }
+
+
     [HttpDelete("{id}")]
     public IActionResult DeleteBooking(int id)
     {
-        repository.Delete(id);
+        service.DeleteBooking(id);
 
         return NoContent();
     }
