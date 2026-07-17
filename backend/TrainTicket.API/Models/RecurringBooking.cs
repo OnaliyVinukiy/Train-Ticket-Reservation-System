@@ -2,7 +2,12 @@ namespace TrainTicket.API.Models;
 
 public class RecurringBooking : Booking
 {
-    public string RecurrencePattern { get; set; } = string.Empty;
+    public RecurrencePattern RecurrencePattern { get; set; }
+
 
     public DateTime RecurrenceEndDate { get; set; }
+    public RecurringBooking()
+    {
+        BookingType = BookingType.Recurring;
+    }
 }
