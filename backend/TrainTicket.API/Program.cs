@@ -30,11 +30,25 @@ var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
 {
-    var bookingRepo = scope.ServiceProvider.GetRequiredService<IRepository<Booking>>();
-    var scheduleRepo = scope.ServiceProvider.GetRequiredService<IRepository<Schedule>>();
-    var requestRepo = scope.ServiceProvider.GetRequiredService<IRepository<SpecialRequest>>();
+    var bookingRepository =
+        scope.ServiceProvider
+        .GetRequiredService<IRepository<Booking>>();
 
-    SeedData.Initialize(bookingRepo, scheduleRepo, requestRepo);
+
+    var scheduleRepository =
+        scope.ServiceProvider
+        .GetRequiredService<IRepository<Schedule>>();
+
+
+    var requestRepository =
+        scope.ServiceProvider
+        .GetRequiredService<IRepository<SpecialRequest>>();
+
+
+    SeedData.Initialize(
+        bookingRepository,
+        scheduleRepository,
+        requestRepository);
 }
 
 
