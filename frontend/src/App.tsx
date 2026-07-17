@@ -1,15 +1,23 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import Bookings from "./pages/Bookings";
+import MainLayout from "./layouts/MainLayout";
+import Dashboard from "./pages/Dashboard";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route
-          path="/bookings"
-          element={<Bookings />}
-        />
+        <Route element={<MainLayout />}>
+          <Route
+            path="/"
+            element={<Dashboard />}
+          />
+          <Route
+            path="/bookings"
+            element={<Bookings />}
+          />
+        </Route>
       </Routes>
     </BrowserRouter>
   );
