@@ -31,39 +31,23 @@ function Sidebar() {
 
 
     return (
-
-        <aside
-            className="
-                w-64
-                min-h-screen
-                bg-slate-900
-                text-white
-                p-6
-            "
-        >
+        <aside className="w-64 min-h-screen bg-slate-900 text-white p-6">
 
             <h1 className="text-xl font-bold mb-8">
                 Train Manager
             </h1>
 
-
             <nav className="space-y-2">
 
                 {
                     menuItems.map((item) => (
-
                         <NavLink
                             key={item.path}
                             to={item.path}
                             className={({ isActive }) =>
                                 `
-                                    block
-                                    px-4
-                                    py-3
-                                    rounded-lg
-                                    transition
-
-                                    ${isActive
+                                block px-4 py-3 rounded-lg transition
+                                ${isActive
                                     ? "bg-blue-600"
                                     : "hover:bg-slate-800"
                                 }
@@ -72,14 +56,12 @@ function Sidebar() {
                         >
                             {item.name}
                         </NavLink>
-
                     ))
                 }
 
             </nav>
 
         </aside>
-
     );
 }
 
