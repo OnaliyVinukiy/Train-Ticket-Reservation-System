@@ -25,6 +25,18 @@ export const createSchedule = async (
 };
 
 
+export const updateSchedule = async (
+    schedule: Schedule
+) => {
+
+    await api.put(
+        `/Schedule/${schedule.id}`,
+        schedule
+    );
+
+};
+
+
 export const deleteSchedule = async (
     id: number
 ) => {
