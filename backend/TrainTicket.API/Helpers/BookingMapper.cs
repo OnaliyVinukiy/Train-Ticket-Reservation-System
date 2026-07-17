@@ -7,9 +7,7 @@ namespace TrainTicket.API.Helpers;
 
 public static class BookingMapper
 {
-
-    public static Booking ToModel(
-        BookingDto dto)
+    public static Booking ToModel(BookingDto dto)
     {
 
         return new Booking
@@ -18,32 +16,28 @@ public static class BookingMapper
 
             TicketPrice = dto.TicketPrice,
 
+            BookingType = dto.BookingType,
+
 
             Route = new Models.Route
             {
-                DepartureStation =
-                    dto.Route.DepartureStation,
+                DepartureStation = dto.Route.DepartureStation,
 
-                DestinationStation =
-                    dto.Route.DestinationStation
+                DestinationStation = dto.Route.DestinationStation
             },
 
 
             Schedule = new Schedule
             {
-                TravelDate =
-                    dto.Schedule.TravelDate,
+                TravelDate = dto.Schedule.TravelDate,
 
-                DepartureTime =
-                    dto.Schedule.DepartureTime,
+                DepartureTime = dto.Schedule.DepartureTime,
 
-                ArrivalTime =
-                    dto.Schedule.ArrivalTime
+                ArrivalTime = dto.Schedule.ArrivalTime
             },
 
 
-            SpecialRequests =
-                dto.SpecialRequests
+            SpecialRequests = dto.SpecialRequests
                 .Select(x => new SpecialRequest
                 {
                     Description = x.Description
