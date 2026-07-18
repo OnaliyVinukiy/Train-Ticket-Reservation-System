@@ -61,4 +61,25 @@ public class BookingRepository
             context.SaveChanges();
         }
     }
+
+    public bool BookingExists(
+    DateTime date,
+    string departure,
+    string destination
+)
+{
+
+    return context.Bookings
+        .Include(b => b.Route)
+        .Include(b => b.Schedule)
+        .Any(
+            b =>
+            b.Schedule.TravelDate == date
+            &&
+            b.Route.DepartureStation == departure
+            &&
+            b.Route.DestinationStation == destination
+        );
+
+}
 }
