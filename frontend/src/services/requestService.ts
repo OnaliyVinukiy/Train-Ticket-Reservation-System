@@ -34,3 +34,13 @@ export const deleteRequest = async (
     );
 
 };
+
+export const updateRequest = async (
+    id: number,
+    request: SpecialRequest
+) => {
+    await api.put(
+        `/SpecialRequest/${id}`,
+        request
+    );
+};
