@@ -62,6 +62,12 @@ builder.Services.AddScoped<SpecialRequestService>();
 
 builder.Services.AddScoped<RecurringBookingService>();
 
+builder.Services.AddScoped<ReportService>();
+
+builder.Services.AddScoped<ExportService>();
+
+builder.Services.AddScoped<ChatbotService>();
+
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddSwaggerGen();
