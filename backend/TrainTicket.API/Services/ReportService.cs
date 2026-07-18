@@ -105,4 +105,33 @@ public class ReportService
             .Where(b => bookingIds.Contains(b.Id))
             .Sum(b => b.TicketPrice);
     }
+
+    public WeeklyReportSummaryDto GetWeeklySummary(DateTime startDate)
+    {
+        DateTime endDate = startDate.AddDays(6);
+
+        var bookings = context.Bookings
+            .Include(b => b.Route)
+            .Include(b => b.Schedule)
+            .Include(b => b.SpecialRequests)
+            .Where(b =>
+                b.Schedule.TravelDate.Date >= startDate.Date &&
+                b.Schedule.TravelDate.Date <= endDate.Date)
+            .ToList();
+
+        return new WeeklyReportSummaryDto
+        {
+            TotalBookings = bookings.Count,
+
+            TotalTicketCost = bookings.Sum(b => b.TicketPrice),
+
+            TotalSpecialRequests = bookings.Sum(b => b.SpecialRequests.Count),
+
+            MostPopularRoute = bookings
+                .GroupBy(b => b.Route.DepartureStation + " → " + b.Route.DestinationStation)
+                .OrderByDescending(g => g.Count())
+                .Select(g => g.Key)
+                .FirstOrDefault() ?? "No Bookings"
+        };
+    }
 }
