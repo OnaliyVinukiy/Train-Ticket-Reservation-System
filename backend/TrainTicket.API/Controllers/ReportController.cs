@@ -1,5 +1,6 @@
+using CsvHelper;
+using System.Globalization;
 using Microsoft.AspNetCore.Mvc;
-using TrainTicket.API.Models;
 using TrainTicket.API.Services;
 
 namespace TrainTicket.API.Controllers;
@@ -9,81 +10,62 @@ namespace TrainTicket.API.Controllers;
 public class ReportController : ControllerBase
 {
     private readonly ReportService service;
-    private readonly ExportService exportService;
 
-    public ReportController(
-      ReportService service,
-      ExportService exportService
-  )
+    public ReportController(ReportService service)
     {
         this.service = service;
-        this.exportService = exportService;
     }
 
-    // Weekly Calendar Report
     [HttpGet("weekly")]
-    public IActionResult GetWeeklyReport(DateTime? startDate)
+    public IActionResult GetWeeklyReport(DateTime startDate)
     {
-        var date = startDate ?? DateTime.Today;
-        return Ok(service.GetWeeklyReport(date));
+        return Ok(service.GetWeeklyReport(startDate));
     }
 
-    [HttpGet("booking")]
-    public IActionResult BookingReport(DateTime fromDate, DateTime toDate, string? route, BookingType? bookingType)
+    [HttpGet("summary")]
+    public IActionResult GetSummary(DateTime startDate)
     {
-        return Ok(service.GetBookingReport(fromDate, toDate, route, bookingType));
+        return Ok(service.GetWeeklySummary(startDate));
+    }
+
+    [HttpGet("export")]
+    public IActionResult ExportCSV(DateTime fromDate, DateTime toDate)
+    {
+        var bookings = service.GetBookingReport(fromDate, toDate, null, null);
+
+        using var memoryStream = new MemoryStream();
+        using var writer = new StreamWriter(memoryStream);
+        using var csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
+
+        csv.WriteRecords(bookings.Select(b => new
+        {
+            BookingId = b.Id,
+            Reference = b.BookingReference,
+            Route = b.Route.DepartureStation + " → " + b.Route.DestinationStation,
+            Date = b.Schedule.TravelDate.ToString("yyyy-MM-dd"),
+            Departure = b.Schedule.DepartureTime,
+            Arrival = b.Schedule.ArrivalTime,
+            Seat = b.SeatNumber,
+            Price = b.TicketPrice,
+            SpecialRequests = string.Join(", ", b.SpecialRequests.Select(x => x.Description))
+        }));
+
+        writer.Flush();
+
+        return File(memoryStream.ToArray(), "text/csv", "booking-report.csv");
     }
 
     [HttpGet("route-frequency")]
-    public IActionResult RouteFrequency(DateTime fromDate, DateTime toDate)
+    public IActionResult GetRouteFrequency(
+    DateTime fromDate,
+    DateTime toDate
+)
     {
-        return Ok(service.GetRouteFrequency(fromDate, toDate));
-    }
-
-
-    [HttpGet("expenditure")]
-    public IActionResult TotalExpenditure(DateTime fromDate, DateTime toDate)
-    {
-        return Ok(new { total = service.GetTotalExpenditure(fromDate, toDate) });
-    }
-
-
-    [HttpPost("total-cost")]
-    public IActionResult TotalSelectedCost(List<int> bookingIds)
-    {
-        return Ok(new { total = service.GetSelectedBookingsCost(bookingIds) });
-    }
-
-
-    [HttpGet("export")]
-    public IActionResult ExportReport(
-        DateTime fromDate,
-        DateTime toDate,
-        string? route,
-        BookingType? bookingType
-    )
-    {
-
-        var bookings =
-            service.GetBookingReport(
+        return Ok(
+            service.GetRouteFrequency(
                 fromDate,
-                toDate,
-                route,
-                bookingType
-            );
-
-
-        var file =
-            exportService.ExportBookingsToCsv(
-                bookings
-            );
-
-
-        return File(
-            file,
-            "text/csv",
-            "booking-report.csv"
+                toDate
+            )
         );
-
     }
 }
