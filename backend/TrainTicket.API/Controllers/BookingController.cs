@@ -14,7 +14,9 @@ public class BookingController : ControllerBase
     private readonly BookingService service;
 
 
-    public BookingController(BookingService service)
+    public BookingController(
+        BookingService service
+    )
     {
         this.service = service;
     }
@@ -23,19 +25,28 @@ public class BookingController : ControllerBase
     [HttpGet]
     public IActionResult GetBookings()
     {
-        return Ok(service.GetAllBookings());
+        return Ok(
+            service.GetAllBookings()
+        );
     }
 
 
     [HttpGet("{id}")]
-    public IActionResult GetBooking(int id)
+    public IActionResult GetBooking(
+        int id
+    )
     {
         var booking = service.GetBookingById(id);
 
 
         if (booking == null)
         {
-            return NotFound();
+            return NotFound(
+                new
+                {
+                    message = "Booking not found"
+                }
+            );
         }
 
 
@@ -45,23 +56,41 @@ public class BookingController : ControllerBase
 
 
     [HttpPost]
-    public IActionResult CreateBooking(Booking booking)
+    public IActionResult CreateBooking(
+        Booking booking
+    )
     {
+
         var created = service.CreateBooking(booking);
 
-        return Ok(created);
+
+        return CreatedAtAction(
+            nameof(GetBooking),
+            new
+            {
+                id = created.Id
+            },
+            created
+        );
+
     }
 
 
     [HttpPut("{id}")]
     public IActionResult UpdateBooking(
         int id,
-        Booking booking)
+        Booking booking
+    )
     {
 
         if (id != booking.Id)
         {
-            return BadRequest();
+            return BadRequest(
+                new
+                {
+                    message = "Booking ID mismatch"
+                }
+            );
         }
 
 
@@ -72,11 +101,66 @@ public class BookingController : ControllerBase
 
 
     [HttpDelete("{id}")]
-    public IActionResult DeleteBooking(int id)
+    public IActionResult DeleteBooking(
+        int id
+    )
     {
+
+        var booking = service.GetBookingById(id);
+
+
+        if (booking == null)
+        {
+            return NotFound(
+                new
+                {
+                    message = "Booking not found"
+                }
+            );
+        }
+
+
         service.DeleteBooking(id);
 
+
         return NoContent();
+
+    }
+
+    [HttpGet("search")]
+    public IActionResult SearchBookings(
+        string? date,
+        string? route,
+        string? reference
+    )
+    {
+
+        var bookings = service.SearchBookings(
+            date,
+            route,
+            reference
+        );
+
+
+        return Ok(bookings);
+
+    }
+
+    [HttpGet("total-cost")]
+    public IActionResult GetTotalCost()
+    {
+
+        var total = service.GetAllBookings()
+            .Sum(x => x.TicketPrice);
+
+
+        return Ok(
+            new
+            {
+                totalCost = total
+            }
+        );
+
     }
 
 }
