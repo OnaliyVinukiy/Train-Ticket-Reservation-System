@@ -60,6 +60,8 @@ builder.Services.AddScoped<ScheduleService>();
 
 builder.Services.AddScoped<SpecialRequestService>();
 
+builder.Services.AddScoped<RecurringBookingService>();
+
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddSwaggerGen();
