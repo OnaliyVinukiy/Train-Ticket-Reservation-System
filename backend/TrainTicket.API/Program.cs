@@ -1,8 +1,11 @@
+using Microsoft.EntityFrameworkCore;
+using System.Text.Json.Serialization;
+
 using TrainTicket.API.Data;
 using TrainTicket.API.Models;
 using TrainTicket.API.Repositories;
 using TrainTicket.API.Services;
-using System.Text.Json.Serialization;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,66 +22,58 @@ builder.Services.AddCors(options =>
 });
 
 
+
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.Converters.Add(
             new JsonStringEnumConverter()
         );
+
+        options.JsonSerializerOptions.ReferenceHandler =
+            ReferenceHandler.IgnoreCycles;
     });
 
-builder.Services.AddSingleton<IRepository<Booking>, MemoryRepository<Booking>>();
 
-builder.Services.AddSingleton<IRepository<Schedule>, MemoryRepository<Schedule>>();
+builder.Services.AddDbContext<AppDbContext>(
+    options =>
+    {
+        options.UseSqlite(
+            "Data Source=TrainTicket.db"
+        );
+    });
 
-builder.Services.AddSingleton<IRepository<SpecialRequest>, MemoryRepository<SpecialRequest>>();
 
-builder.Services.AddSingleton<BookingService>();
+// Repository registrations
 
-builder.Services.AddSingleton<ScheduleService>();
+builder.Services.AddScoped<IRepository<Schedule>, EFRepository<Schedule>>();
 
-builder.Services.AddSingleton<SpecialRequestService>();
+builder.Services.AddScoped<IRepository<SpecialRequest>, EFRepository<SpecialRequest>>();
 
-builder.Services.AddSingleton<ReportService>();
+builder.Services.AddScoped<BookingRepository>();
+
+
+// Services
+builder.Services.AddScoped<BookingService>();
+
+builder.Services.AddScoped<ScheduleService>();
+
+builder.Services.AddScoped<SpecialRequestService>();
 
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddSwaggerGen();
 
+
 var app = builder.Build();
 
 app.UseCors("AllowReact");
-
-using (var scope = app.Services.CreateScope())
-{
-    var bookingRepository =
-        scope.ServiceProvider
-        .GetRequiredService<IRepository<Booking>>();
-
-
-    var scheduleRepository =
-        scope.ServiceProvider
-        .GetRequiredService<IRepository<Schedule>>();
-
-
-    var requestRepository =
-        scope.ServiceProvider
-        .GetRequiredService<IRepository<SpecialRequest>>();
-
-
-    SeedData.Initialize(
-        bookingRepository,
-        scheduleRepository,
-        requestRepository);
-}
-
 
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
 
 app.UseHttpsRedirection();
 
