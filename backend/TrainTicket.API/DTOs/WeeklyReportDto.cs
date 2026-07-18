@@ -25,3 +25,14 @@ public class WeeklyBookingDto
 
     public List<string> SpecialRequests { get; set; } = new();
 }
+
+public class WeeklyReportSummaryDto
+{
+    public int TotalBookings { get; set; }
+
+    public decimal TotalTicketCost { get; set; }
+
+    public string MostPopularRoute { get; set; } = "";
+
+    public int TotalSpecialRequests { get; set; }
+}
