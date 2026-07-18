@@ -39,6 +39,8 @@ builder.Services.AddSingleton<ScheduleService>();
 
 builder.Services.AddSingleton<SpecialRequestService>();
 
+builder.Services.AddSingleton<ReportService>();
+
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddSwaggerGen();
