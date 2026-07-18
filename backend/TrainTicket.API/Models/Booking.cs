@@ -1,28 +1,26 @@
-using System.ComponentModel.DataAnnotations;
-
 namespace TrainTicket.API.Models;
 
 public class Booking
 {
     public int Id { get; set; }
 
-    public string BookingReference { get; set; } = Guid.NewGuid().ToString();
+    public string BookingReference { get; set; } = "";
 
+    public string SeatNumber { get; set; } = "";
 
-    [Required]
-    public string SeatNumber { get; set; } = string.Empty;
-
-
-    [Range(0.01, double.MaxValue)]
     public decimal TicketPrice { get; set; }
 
+    public BookingType BookingType { get; set; }
 
-    public BookingType BookingType { get; set; } = BookingType.OneOff;
+
+    public int RouteId { get; set; }
+
+    public Route Route { get; set; } = null!;
 
 
-    public Route Route { get; set; } = new();
+    public int ScheduleId { get; set; }
 
-    public Schedule Schedule { get; set; } = new();
+    public Schedule Schedule { get; set; } = null!;
 
 
     public List<SpecialRequest> SpecialRequests { get; set; } = new();
