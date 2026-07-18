@@ -19,31 +19,40 @@ public class RecurringBookingService
 
         while (currentDate <= recurringBooking.RecurrenceEndDate)
         {
-            var booking = new Booking
-            {
-                BookingReference = Guid.NewGuid().ToString().Substring(0, 8).ToUpper(),
-                SeatNumber = recurringBooking.SeatNumber,
-                TicketPrice = recurringBooking.TicketPrice,
-                BookingType = BookingType.OneOff,
-                Route = new Models.Route
-                {
-                    DepartureStation = recurringBooking.Route.DepartureStation,
-                    DestinationStation = recurringBooking.Route.DestinationStation
-                },
-                Schedule = new Schedule
-                {
-                    TravelDate = currentDate,
-                    DepartureTime = recurringBooking.Schedule.DepartureTime,
-                    ArrivalTime = recurringBooking.Schedule.ArrivalTime
-                },
-                SpecialRequests = recurringBooking.SpecialRequests.Select(x => new SpecialRequest
-                {
-                    Description = x.Description
-                }).ToList()
-            };
+            // Check overlap
+            bool exists = repository.BookingExists(
+                currentDate,
+                recurringBooking.Route.DepartureStation,
+                recurringBooking.Route.DestinationStation
+            );
 
-            repository.CreateBooking(booking);
-            generatedBookings.Add(booking);
+            if (!exists)
+            {
+                var booking = new Booking
+                {
+                    BookingReference = Guid.NewGuid().ToString().Substring(0, 8).ToUpper(),
+                    SeatNumber = recurringBooking.SeatNumber,
+                    TicketPrice = recurringBooking.TicketPrice,
+                    BookingType = BookingType.OneOff,
+                    Route = new Models.Route
+                    {
+                        DepartureStation = recurringBooking.Route.DepartureStation,
+                        DestinationStation = recurringBooking.Route.DestinationStation
+                    },
+                    Schedule = new Schedule
+                    {
+                        TravelDate = currentDate,
+                        DepartureTime = recurringBooking.Schedule.DepartureTime,
+                        ArrivalTime = recurringBooking.Schedule.ArrivalTime
+                    },
+                    SpecialRequests = recurringBooking.SpecialRequests
+                        .Select(x => new SpecialRequest { Description = x.Description })
+                        .ToList()
+                };
+
+                repository.CreateBooking(booking);
+                generatedBookings.Add(booking);
+            }
 
             currentDate = GetNextDate(currentDate, recurringBooking.RecurrencePattern);
         }
