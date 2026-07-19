@@ -50,7 +50,7 @@ function Chatbot() {
                 </div>
                 <div>
                     <h2 className="text-xl font-semibold text-white">Train Prediction Assistant</h2>
-                    <p className="text-blue-100 text-sm">AI-powered availability & price trends</p>
+                    
                 </div>
             </div>
 
