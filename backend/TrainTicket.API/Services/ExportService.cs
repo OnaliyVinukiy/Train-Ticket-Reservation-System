@@ -14,7 +14,7 @@ public class ExportService
         {
             string requests = string.Join(" | ", booking.SpecialRequests.Select(x => x.Description));
             csv.AppendLine($"{booking.BookingReference}," +
-                $"{booking.Route.DepartureStation} -> {booking.Route.DestinationStation}," +
+                $"{booking.Route.DepartureStation} to {booking.Route.DestinationStation}," +
                 $"{booking.Schedule.TravelDate:yyyy-MM-dd}," +
                 $"{booking.Schedule.DepartureTime}," +
                 $"{booking.Schedule.ArrivalTime}," +
