@@ -1,176 +1,197 @@
 using TrainTicket.API.Models;
-using TrainTicket.API.Repositories;
+using Route = TrainTicket.API.Models.Route;
 
 namespace TrainTicket.API.Data;
 
-public static class SeedData
+public static class DataSeeder
 {
-    public static void Initialize(
-        IRepository<Booking> bookingRepository,
-        IRepository<Schedule> scheduleRepository,
-        IRepository<SpecialRequest> requestRepository)
+    public static void Seed(AppDbContext context)
     {
-        // Prevent duplicate data
-        if (bookingRepository.GetAll().Any())
-        {
+        if (context.Bookings.Any())
             return;
-        }
 
+        // ==========================
+        // Routes
+        // ==========================
 
-        // Schedule 1
-        var schedule1 = new Schedule
+        var colomboKandy = new Route
         {
-            TravelDate = new DateTime(2026, 8, 3),
-            DepartureTime = new TimeSpan(8, 0, 0),
-            ArrivalTime = new TimeSpan(10, 30, 0)
+            DepartureStation = "Colombo Fort",
+            DestinationStation = "Kandy"
         };
 
-
-        // Schedule 2
-        var schedule2 = new Schedule
+        var colomboGalle = new Route
         {
-            TravelDate = new DateTime(2026, 8, 5),
-            DepartureTime = new TimeSpan(9, 15, 0),
-            ArrivalTime = new TimeSpan(11, 45, 0)
+            DepartureStation = "Colombo Fort",
+            DestinationStation = "Galle"
         };
 
-
-        // Schedule 3
-        var schedule3 = new Schedule
+        var colomboJaffna = new Route
         {
-            TravelDate = new DateTime(2026, 8, 7),
-            DepartureTime = new TimeSpan(14, 0, 0),
-            ArrivalTime = new TimeSpan(16, 30, 0)
+            DepartureStation = "Colombo Fort",
+            DestinationStation = "Jaffna"
         };
 
-
-        scheduleRepository.Add(schedule1);
-        scheduleRepository.Add(schedule2);
-        scheduleRepository.Add(schedule3);
-
-
-
-        // Special Requests
-
-        var request1 = new SpecialRequest
+        var kandyBadulla = new Route
         {
-            Description = "Window seat"
+            DepartureStation = "Kandy",
+            DestinationStation = "Badulla"
         };
 
+        context.Routes.AddRange(
+            colomboKandy,
+            colomboGalle,
+            colomboJaffna,
+            kandyBadulla
+        );
 
-        var request2 = new SpecialRequest
-        {
-            Description = "Wheelchair assistance"
-        };
+        context.SaveChanges();
 
-
-        var request3 = new SpecialRequest
-        {
-            Description = "Extra luggage"
-        };
-
-
-        requestRepository.Add(request1);
-        requestRepository.Add(request2);
-        requestRepository.Add(request3);
-
-
-
+        // ==========================
         // Bookings
+        // ==========================
 
-        var booking1 = new Booking
+        AddBooking(
+            context,
+            "TRN001",
+            colomboKandy,
+            new DateTime(2026, 7, 20),
+            new TimeSpan(6, 30, 0),
+            new TimeSpan(9, 0, 0),
+            "A12",
+            1800,
+            BookingType.OneOff,
+            "Window Seat"
+        );
+
+        AddBooking(
+            context,
+            "TRN002",
+            colomboKandy,
+            new DateTime(2026, 7, 22),
+            new TimeSpan(6, 30, 0),
+            new TimeSpan(9, 0, 0),
+            "A18",
+            1850,
+            BookingType.Recurring,
+            "Extra Luggage"
+        );
+
+        AddBooking(
+            context,
+            "TRN003",
+            colomboGalle,
+            new DateTime(2026, 7, 23),
+            new TimeSpan(8, 0, 0),
+            new TimeSpan(10, 15, 0),
+            "B05",
+            1450,
+            BookingType.OneOff,
+            "Near Exit"
+        );
+
+        AddBooking(
+            context,
+            "TRN004",
+            colomboGalle,
+            new DateTime(2026, 7, 24),
+            new TimeSpan(8, 0, 0),
+            new TimeSpan(10, 15, 0),
+            "B10",
+            1500,
+            BookingType.OneOff,
+            "Window Seat"
+        );
+
+        AddBooking(
+            context,
+            "TRN005",
+            colomboJaffna,
+            new DateTime(2026, 7, 25),
+            new TimeSpan(20, 0, 0),
+            new TimeSpan(5, 45, 0),
+            "C08",
+            3900,
+            BookingType.OneOff,
+            "Sleeper Preference"
+        );
+
+        AddBooking(
+            context,
+            "TRN006",
+            kandyBadulla,
+            new DateTime(2026, 7, 26),
+            new TimeSpan(9, 30, 0),
+            new TimeSpan(13, 0, 0),
+            "D11",
+            1200,
+            BookingType.Recurring,
+            "Window Seat"
+        );
+
+        AddBooking(
+            context,
+            "TRN007",
+            colomboKandy,
+            new DateTime(2026, 8, 1),
+            new TimeSpan(6, 30, 0),
+            new TimeSpan(9, 0, 0),
+            "A07",
+            1900,
+            BookingType.OneOff,
+            "Wheelchair Assistance"
+        );
+
+        AddBooking(
+            context,
+            "TRN008",
+            colomboKandy,
+            new DateTime(2026, 8, 2),
+            new TimeSpan(6, 30, 0),
+            new TimeSpan(9, 0, 0),
+            "A20",
+            1950,
+            BookingType.OneOff,
+            "Extra Luggage"
+        );
+
+        context.SaveChanges();
+    }
+
+    private static void AddBooking(
+        AppDbContext context,
+        string reference,
+        Route route,
+        DateTime date,
+        TimeSpan departure,
+        TimeSpan arrival,
+        string seat,
+        decimal price,
+        BookingType type,
+        string request)
+    {
+        var booking = new Booking
         {
-            BookingReference = "BK001",
-
-            SeatNumber = "A12",
-
-            TicketPrice = 1200,
-
-            BookingType = BookingType.OneOff,
-
-
-            Route = new Models.Route
+            BookingReference = reference,
+            Route = route,
+            BookingType = type,
+            SeatNumber = seat,
+            TicketPrice = price,
+            Schedule = new Schedule
             {
-                DepartureStation = "Colombo Fort",
-
-                DestinationStation = "Kandy"
+                TravelDate = date,
+                DepartureTime = departure,
+                ArrivalTime = arrival
             },
-
-
-            Schedule = schedule1,
-
-
             SpecialRequests =
             [
-                request1
+                new SpecialRequest
+                {
+                    Description = request
+                }
             ]
         };
 
-
-
-        var booking2 = new Booking
-        {
-            BookingReference = "BK002",
-
-            SeatNumber = "B05",
-
-            TicketPrice = 850,
-
-            BookingType = BookingType.OneOff,
-
-
-            Route = new Models.Route
-            {
-                DepartureStation = "Colombo Fort",
-
-                DestinationStation = "Galle"
-            },
-
-
-            Schedule = schedule2,
-
-
-            SpecialRequests =
-            [
-                request2
-            ]
-        };
-
-
-
-        var booking3 = new Booking
-        {
-            BookingReference = "BK003",
-
-            SeatNumber = "C20",
-
-            TicketPrice = 950,
-
-            BookingType = BookingType.OneOff,
-
-
-            Route = new Models.Route
-            {
-                DepartureStation = "Kandy",
-
-                DestinationStation = "Colombo Fort"
-            },
-
-
-            Schedule = schedule3,
-
-
-            SpecialRequests =
-            [
-                request3
-            ]
-        };
-
-
-        bookingRepository.Add(booking1);
-
-        bookingRepository.Add(booking2);
-
-        bookingRepository.Add(booking3);
+        context.Bookings.Add(booking);
     }
 }
