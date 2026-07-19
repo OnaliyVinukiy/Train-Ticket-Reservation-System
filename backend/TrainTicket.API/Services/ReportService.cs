@@ -15,122 +15,163 @@ public class ReportService
     }
 
     // Weekly Calendar View
+
     public List<WeeklyReportDto> GetWeeklyReport(DateTime startDate)
     {
-        var weeklyReport = new List<WeeklyReportDto>();
+        List<WeeklyReportDto> report = new();
 
         for (int i = 0; i < 7; i++)
         {
-            DateTime currentDate = startDate.Date.AddDays(i);
+            DateTime current = startDate.Date.AddDays(i);
 
             var bookings = context.Bookings
-                .Include(b => b.Route)
-                .Include(b => b.Schedule)
-                .Include(b => b.SpecialRequests)
-                .Where(b => b.Schedule.TravelDate.Date == currentDate.Date)
+                .Include(x => x.Route)
+                .Include(x => x.Schedule)
+                .Include(x => x.SpecialRequests)
+                .Where(x => x.Schedule.TravelDate.Date == current)
                 .ToList();
 
-            var dailyReport = new WeeklyReportDto
+            WeeklyReportDto day = new()
             {
-                Date = currentDate,
-                Day = currentDate.DayOfWeek.ToString()
+                Date = current,
+                Day = current.DayOfWeek.ToString()
             };
 
             foreach (var booking in bookings)
             {
-                dailyReport.Bookings.Add(new WeeklyBookingDto
+                day.Bookings.Add(new WeeklyBookingDto
                 {
                     BookingId = booking.Id,
-                    Route = booking.Route.DepartureStation + " → " + booking.Route.DestinationStation,
+                    Route = booking.Route.DepartureStation +
+                            " → " +
+                            booking.Route.DestinationStation,
+
                     SeatNumber = booking.SeatNumber,
                     TicketPrice = booking.TicketPrice,
-                    SpecialRequests = booking.SpecialRequests.Select(x => x.Description).ToList()
+
+                    SpecialRequests = booking.SpecialRequests
+                        .Select(x => x.Description)
+                        .ToList()
                 });
             }
 
-            weeklyReport.Add(dailyReport);
+            report.Add(day);
         }
 
-        return weeklyReport;
+        return report;
     }
 
-    public List<Booking> GetBookingReport(DateTime fromDate, DateTime toDate, string? route, BookingType? bookingType)
+    // Booking report with filters
+
+    public List<Booking> GetBookingReport(
+        DateTime fromDate,
+        DateTime toDate,
+        string? route,
+        BookingType? bookingType)
     {
         var query = context.Bookings
-            .Include(b => b.Route)
-            .Include(b => b.Schedule)
-            .Include(b => b.SpecialRequests)
-            .Where(b => b.Schedule.TravelDate >= fromDate && b.Schedule.TravelDate <= toDate)
+            .Include(x => x.Route)
+            .Include(x => x.Schedule)
+            .Include(x => x.SpecialRequests)
             .AsQueryable();
 
-        if (!string.IsNullOrEmpty(route))
+        query = query.Where(x =>
+            x.Schedule.TravelDate >= fromDate &&
+            x.Schedule.TravelDate <= toDate);
+
+        if (!string.IsNullOrWhiteSpace(route))
         {
-            query = query.Where(b =>
-                b.Route.DepartureStation.Contains(route) ||
-                b.Route.DestinationStation.Contains(route));
+            query = query.Where(x =>
+                x.Route.DepartureStation.Contains(route) ||
+                x.Route.DestinationStation.Contains(route));
         }
 
         if (bookingType != null)
         {
-            query = query.Where(b => b.BookingType == bookingType);
+            query = query.Where(x =>
+                x.BookingType == bookingType);
         }
 
         return query.ToList();
     }
 
+    // Route frequency
 
-    public Dictionary<string, int> GetRouteFrequency(DateTime fromDate, DateTime toDate)
+    public Dictionary<string, int> GetRouteFrequency(
+        DateTime fromDate,
+        DateTime toDate)
     {
         return context.Bookings
-            .Include(b => b.Route)
-            .Include(b => b.Schedule)
-            .Where(b => b.Schedule.TravelDate >= fromDate && b.Schedule.TravelDate <= toDate)
-            .GroupBy(b => b.Route.DepartureStation + " → " + b.Route.DestinationStation)
-            .ToDictionary(x => x.Key, x => x.Count());
+            .Include(x => x.Route)
+            .Include(x => x.Schedule)
+            .Where(x =>
+                x.Schedule.TravelDate >= fromDate &&
+                x.Schedule.TravelDate <= toDate)
+            .GroupBy(x =>
+                x.Route.DepartureStation +
+                " → " +
+                x.Route.DestinationStation)
+            .ToDictionary(
+                x => x.Key,
+                x => x.Count());
     }
 
-  
-    public decimal GetTotalExpenditure(DateTime fromDate, DateTime toDate)
+    // Total expenditure
+
+    public decimal GetTotalExpenditure(
+        DateTime fromDate,
+        DateTime toDate)
     {
         return context.Bookings
-            .Include(b => b.Schedule)
-            .Where(b => b.Schedule.TravelDate >= fromDate && b.Schedule.TravelDate <= toDate)
-            .Sum(b => b.TicketPrice);
+            .Include(x => x.Schedule)
+            .Where(x =>
+                x.Schedule.TravelDate >= fromDate &&
+                x.Schedule.TravelDate <= toDate)
+            .Sum(x => x.TicketPrice);
     }
 
+    // Selected booking cost
 
-    public decimal GetSelectedBookingsCost(List<int> bookingIds)
+    public decimal GetSelectedBookingsCost(
+        List<int> bookingIds)
     {
         return context.Bookings
-            .Where(b => bookingIds.Contains(b.Id))
-            .Sum(b => b.TicketPrice);
+            .Where(x => bookingIds.Contains(x.Id))
+            .Sum(x => x.TicketPrice);
     }
 
-    public WeeklyReportSummaryDto GetWeeklySummary(DateTime startDate)
+    // Dashboard summary
+
+    public WeeklyReportSummaryDto GetWeeklySummary(
+        DateTime startDate)
     {
         DateTime endDate = startDate.AddDays(6);
 
         var bookings = context.Bookings
-            .Include(b => b.Route)
-            .Include(b => b.Schedule)
-            .Include(b => b.SpecialRequests)
-            .Where(b =>
-                b.Schedule.TravelDate.Date >= startDate.Date &&
-                b.Schedule.TravelDate.Date <= endDate.Date)
+            .Include(x => x.Route)
+            .Include(x => x.Schedule)
+            .Include(x => x.SpecialRequests)
+            .Where(x =>
+                x.Schedule.TravelDate.Date >= startDate.Date &&
+                x.Schedule.TravelDate.Date <= endDate.Date)
             .ToList();
 
         return new WeeklyReportSummaryDto
         {
             TotalBookings = bookings.Count,
 
-            TotalTicketCost = bookings.Sum(b => b.TicketPrice),
+            TotalTicketCost = bookings.Sum(x => x.TicketPrice),
 
-            TotalSpecialRequests = bookings.Sum(b => b.SpecialRequests.Count),
+            TotalSpecialRequests = bookings.Sum(x =>
+                x.SpecialRequests.Count),
 
             MostPopularRoute = bookings
-                .GroupBy(b => b.Route.DepartureStation + " → " + b.Route.DestinationStation)
-                .OrderByDescending(g => g.Count())
-                .Select(g => g.Key)
+                .GroupBy(x =>
+                    x.Route.DepartureStation +
+                    " → " +
+                    x.Route.DestinationStation)
+                .OrderByDescending(x => x.Count())
+                .Select(x => x.Key)
                 .FirstOrDefault() ?? "No Bookings"
         };
     }
