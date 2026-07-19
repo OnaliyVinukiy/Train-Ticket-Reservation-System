@@ -68,6 +68,8 @@ builder.Services.AddScoped<ExportService>();
 
 builder.Services.AddScoped<ChatbotService>();
 
+builder.Services.AddScoped<PredictionService>();
+
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddSwaggerGen();
