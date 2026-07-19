@@ -5,7 +5,7 @@ using TrainTicket.API.Services;
 namespace TrainTicket.API.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/chatbot")]
 public class ChatbotController : ControllerBase
 {
     private readonly ChatbotService service;
@@ -15,27 +15,10 @@ public class ChatbotController : ControllerBase
         this.service = service;
     }
 
-    // Chatbot question endpoint
     [HttpPost]
-    public IActionResult Ask(ChatbotRequestDto request)
+    public IActionResult Chat(ChatbotRequestDto request)
     {
-        var response = service.Ask(request.Question);
+        var response = service.ProcessMessage(request.Message);
         return Ok(response);
-    }
-
-    // Seat availability prediction
-    [HttpGet("availability")]
-    public IActionResult PredictAvailability(DateTime date, string departure, string destination)
-    {
-        var result = service.PredictAvailability(date, departure, destination);
-        return Ok(result);
-    }
-
-    // Ticket price prediction
-    [HttpGet("price")]
-    public IActionResult PredictPrice()
-    {
-        var result = service.PredictPrice();
-        return Ok(result);
     }
 }
