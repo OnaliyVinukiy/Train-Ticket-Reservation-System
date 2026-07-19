@@ -1,126 +1,218 @@
-using Microsoft.EntityFrameworkCore;
-using TrainTicket.API.Data;
+using System.Text.RegularExpressions;
+using TrainTicket.API.Models;
 using TrainTicket.API.Models.DTOs;
 
 namespace TrainTicket.API.Services;
 
 public class ChatbotService
 {
-    private readonly AppDbContext context;
+    private readonly PredictionService predictionService;
+    private readonly ReportService reportService;
 
-    public ChatbotService(AppDbContext context)
+    public ChatbotService(PredictionService predictionService, ReportService reportService)
     {
-        this.context = context;
+        this.predictionService = predictionService;
+        this.reportService = reportService;
     }
 
-    // Main chatbot response
-    public ChatbotResponseDto Ask(string question)
+    public object ProcessMessage(string message)
     {
-        string text = question.ToLower();
+        message = message.Trim();
+        ChatIntent intent = DetectIntent(message);
 
-        if (text.Contains("availability") || text.Contains("seat"))
+        switch (intent)
         {
-            return new ChatbotResponseDto
-            {
-                Response = "Please provide travel date and route to predict seat availability."
-            };
-        }
-
-        if (text.Contains("price") || text.Contains("cost"))
-        {
-            var bookings = context.Bookings.ToList();
-            if (bookings.Count == 0)
-            {
-                return new ChatbotResponseDto
+            case ChatIntent.Greeting:
+                return new
                 {
-                    Response = "Not enough booking history available for price prediction."
+                    reply =
+                        "Hello! I can predict train availability and ticket price trends.\n\n" +
+                        "Try asking:\n" +
+                        "• Will Colombo to Kandy be available tomorrow?\n" +
+                        "• Predict ticket prices for Galle to Colombo\n" +
+                        "• What is the most popular route?\n" +
+                        "• Show this week's summary"
                 };
-            }
-            decimal averagePrice = bookings.Average(x => x.TicketPrice);
-            return new ChatbotResponseDto
-            {
-                Response = $"Based on previous booking patterns, average ticket price is Rs. {averagePrice}. Future prices are expected around this range."
-            };
-        }
 
-        return new ChatbotResponseDto
-        {
-            Response = "I can predict seat availability and ticket price trends."
-        };
+            case ChatIntent.Help:
+                return new
+                {
+                    reply =
+                        "You can ask me things like:\n\n" +
+                        "• Will Colombo to Kandy be available tomorrow?\n" +
+                        "• Predict prices for Colombo to Badulla\n" +
+                        "• Which route is busiest?\n" +
+                        "• Show weekly summary"
+                };
+
+            case ChatIntent.PopularRoute:
+                var summary = reportService.GetWeeklySummary(DateTime.Today);
+                return new
+                {
+                    reply = $"The most popular route this week is {summary.MostPopularRoute}."
+                };
+
+            case ChatIntent.WeeklySummary:
+                var weekly = reportService.GetWeeklySummary(DateTime.Today);
+                return new
+                {
+                    reply =
+$"""
+Weekly Summary
+
+Bookings : {weekly.TotalBookings}
+
+Total Cost : Rs. {weekly.TotalTicketCost}
+
+Special Requests : {weekly.TotalSpecialRequests}
+
+Most Popular Route : {weekly.MostPopularRoute}
+"""
+                };
+
+            case ChatIntent.Availability:
+            case ChatIntent.PriceTrend:
+            case ChatIntent.Recommendation:
+                return HandlePrediction(message);
+
+            default:
+                return new
+                {
+                    reply =
+                        "Sorry, I couldn't understand your question. Type 'help' to see what I can do."
+                };
+        }
     }
 
-    // Availability prediction engine
-    public AvailabilityPredictionDto PredictAvailability(DateTime date, string departure, string destination)
+    private object HandlePrediction(string message)
     {
-        const int totalSeats = 50;
+        string route = ExtractRoute(message);
+        DateTime date = ExtractDate(message);
 
-        var bookings = context.Bookings
-            .Include(b => b.Route)
-            .Include(b => b.Schedule)
-            .Where(b =>
-                b.Route.DepartureStation == departure &&
-                b.Route.DestinationStation == destination)
-            .ToList();
-
-        int currentBookings = bookings
-            .Count(b => b.Schedule.TravelDate.Date == date.Date);
-
-        int historicalBookings = bookings
-            .Count(b => b.Schedule.TravelDate.DayOfWeek == date.DayOfWeek);
-
-        bool peakDay = date.DayOfWeek == DayOfWeek.Friday || date.DayOfWeek == DayOfWeek.Sunday;
-
-        int predictedBookings = historicalBookings;
-        if (peakDay) predictedBookings += 10;
-        if (currentBookings > predictedBookings) predictedBookings = currentBookings;
-
-        int availableSeats = totalSeats - predictedBookings;
-        if (availableSeats < 0) availableSeats = 0;
-
-        string status;
-        if (availableSeats > 30)
-            status = "High Availability";
-        else if (availableSeats > 10)
-            status = "Moderate Availability";
-        else
-            status = "Low Availability";
-
-        string recommendation = status switch
-        {
-            "High Availability" => "Seats are expected to be available. Normal booking is recommended.",
-            "Moderate Availability" => "Demand is increasing. Booking earlier is recommended.",
-            _ => "High demand expected. Immediate booking is recommended."
-        };
-
-        return new AvailabilityPredictionDto
-        {
-            TravelDate = date,
-            Route = $"{departure} -> {destination}",
-            AvailableSeats = availableSeats,
-            AvailabilityStatus = status,
-            Recommendation = recommendation
-        };
-    }
-
-    // Price prediction
-    public object PredictPrice()
-    {
-        var bookings = context.Bookings.ToList();
-        if (bookings.Count == 0)
-        {
-            return new { message = "Not enough historical data." };
-        }
-
-        decimal averagePrice = bookings.Average(b => b.TicketPrice);
-        decimal highestPrice = bookings.Max(b => b.TicketPrice);
-        decimal lowestPrice = bookings.Min(b => b.TicketPrice);
+        var prediction = predictionService.Predict(route, date, "Any");
 
         return new
         {
-            AveragePrice = averagePrice,
-            HighestRecordedPrice = highestPrice,
-            LowestRecordedPrice = lowestPrice,
-            Prediction = "Future ticket prices are expected to remain within the historical price range."
+            reply =
+$"""
+Prediction Result
+
+Route:
+{prediction.Route}
+
+Travel Date:
+{prediction.TravelDate:dd MMM yyyy}
+
+Availability:
+{prediction.AvailabilityStatus}
+
+Average Historical Price:
+Rs. {prediction.AverageHistoricalPrice}
+
+Price Trend:
+{prediction.PriceTrend}
+
+Reason:
+{string.Join("\n", prediction.Factors)}
+
+Recommendation:
+{prediction.Recommendation}
+""",
+            availability = prediction.AvailabilityStatus,
+            priceTrend = prediction.PriceTrend,
+            recommendation = prediction.Recommendation,
+            factors = prediction.Factors
         };
     }
+
+    private ChatIntent DetectIntent(string message)
+    {
+        message = message.ToLower();
+
+        if (Regex.IsMatch(message, @"\b(hi|hello|hey)\b"))
+            return ChatIntent.Greeting;
+
+        if (message.Contains("help"))
+            return ChatIntent.Help;
+
+        if (message.Contains("popular route") || message.Contains("busiest"))
+            return ChatIntent.PopularRoute;
+
+        if (message.Contains("summary"))
+            return ChatIntent.WeeklySummary;
+
+        if (message.Contains("price"))
+            return ChatIntent.PriceTrend;
+
+        if (message.Contains("recommend"))
+            return ChatIntent.Recommendation;
+
+        if (message.Contains("available") || message.Contains("availability") || message.Contains("seat"))
+            return ChatIntent.Availability;
+
+        return ChatIntent.Unknown;
+    }
+
+    private string ExtractRoute(string message)
+    {
+        var routes = new[]
+        {
+            "Colombo",
+            "Kandy",
+            "Galle",
+            "Jaffna",
+            "Badulla",
+            "Matara",
+            "Anuradhapura",
+            "Kurunegala",
+            "Negombo"
+        };
+
+        string? departure = null;
+        string? destination = null;
+
+        foreach (var station in routes)
+        {
+            if (message.Contains(station, StringComparison.OrdinalIgnoreCase))
+            {
+                if (departure == null)
+                    departure = station;
+                else
+                    destination = station;
+            }
+        }
+
+        if (departure != null && destination != null)
+            return $"{departure} → {destination}";
+
+        return "Unknown Route";
+    }
+
+    private DateTime ExtractDate(string message)
+    {
+        message = message.ToLower();
+
+        if (message.Contains("today"))
+            return DateTime.Today;
+
+        if (message.Contains("tomorrow"))
+            return DateTime.Today.AddDays(1);
+
+        if (message.Contains("next week"))
+            return DateTime.Today.AddDays(7);
+
+        return DateTime.Today;
+    }
+}
+
+public enum ChatIntent
+{
+    Unknown,
+    Greeting,
+    Help,
+    Availability,
+    PriceTrend,
+    Recommendation,
+    PopularRoute,
+    WeeklySummary
 }
