@@ -32,6 +32,7 @@ function BookingForm({ onSubmit, editingBooking }: BookingFormProps) {
     const [booking, setBooking] = useState<Booking>(emptyBooking);
     const [requests, setRequests] = useState<string[]>([]);
     const [newRequest, setNewRequest] = useState("");
+    const [errors, setErrors] = useState<Record<string, string>>({});
 
     useEffect(() => {
         if (editingBooking) {
@@ -48,17 +49,104 @@ function BookingForm({ onSubmit, editingBooking }: BookingFormProps) {
         );
     };
 
+    const validateForm = () => {
+        const newErrors: Record<string, string> = {};
+
+        if (!booking.route.departureStation.trim()) {
+            newErrors.departureStation = "Departure station is required";
+        }
+
+        if (!booking.route.destinationStation.trim()) {
+            newErrors.destinationStation = "Destination station is required";
+        }
+
+        if (
+            booking.route.departureStation.trim() &&
+            booking.route.destinationStation.trim() &&
+            booking.route.departureStation === booking.route.destinationStation
+        ) {
+            newErrors.destinationStation =
+                "Destination cannot be the same as departure station";
+        }
+
+
+        if (!booking.schedule.travelDate) {
+            newErrors.travelDate = "Travel date is required";
+        }
+        else if (
+            new Date(booking.schedule.travelDate) < new Date()
+        ) {
+            newErrors.travelDate =
+                "Travel date cannot be in the past";
+        }
+
+
+        if (!booking.schedule.departureTime) {
+            newErrors.departureTime = "Departure time is required";
+        }
+
+
+        if (!booking.schedule.arrivalTime) {
+            newErrors.arrivalTime = "Arrival time is required";
+        }
+
+
+        if (
+            booking.schedule.departureTime &&
+            booking.schedule.arrivalTime &&
+            booking.schedule.departureTime >= booking.schedule.arrivalTime
+        ) {
+            newErrors.arrivalTime =
+                "Arrival time must be after departure time";
+        }
+
+
+        if (!booking.seatNumber.trim()) {
+            newErrors.seatNumber = "Seat number is required";
+        }
+
+
+        if (booking.ticketPrice <= 0) {
+            newErrors.ticketPrice =
+                "Ticket price must be greater than zero";
+        }
+
+
+        if (
+            booking.bookingType === BOOKING_TYPES.Recurring &&
+            !booking.recurrenceEndDate
+        ) {
+            newErrors.recurrenceEndDate =
+                "Recurrence end date is required";
+        }
+
+
+        setErrors(newErrors);
+
+        return Object.keys(newErrors).length === 0;
+    };
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (!validateForm()) {
+            return;
+        }
+
+
         const updatedBooking: Booking = {
             ...booking,
             specialRequests: requests.map(request => ({
                 description: request
             }))
         };
+
+
         onSubmit(updatedBooking);
+
         setBooking(emptyBooking);
         setRequests([]);
+        setErrors({});
     };
 
     return (
@@ -80,7 +168,10 @@ function BookingForm({ onSubmit, editingBooking }: BookingFormProps) {
                         </label>
                         <input
                             id="departure"
-                            className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition duration-200 placeholder-gray-400"
+                            className={`w-full px-4 py-2.5 border rounded-xl outline-none transition ${errors.departureStation
+                                ? "border-red-500 focus:ring-red-500"
+                                : "border-gray-300 focus:ring-blue-500"
+                                }`}
                             placeholder="e.g. London"
                             value={booking.route.departureStation}
                             onChange={(e) =>
@@ -90,6 +181,11 @@ function BookingForm({ onSubmit, editingBooking }: BookingFormProps) {
                                 })
                             }
                         />
+                        {errors.departureStation && (
+                            <p className="text-sm text-red-600">
+                                {errors.departureStation}
+                            </p>
+                        )}
                     </div>
                     <div className="space-y-1">
                         <label htmlFor="destination" className="text-sm font-medium text-gray-700">
@@ -97,7 +193,10 @@ function BookingForm({ onSubmit, editingBooking }: BookingFormProps) {
                         </label>
                         <input
                             id="destination"
-                            className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition duration-200 placeholder-gray-400"
+                            className={`w-full px-4 py-2.5 border rounded-xl outline-none transition ${errors.destinationStation
+                                ? "border-red-500 focus:ring-red-500"
+                                : "border-gray-300 focus:ring-blue-500"
+                                }`}
                             placeholder="e.g. Paris"
                             value={booking.route.destinationStation}
                             onChange={(e) =>
@@ -107,6 +206,11 @@ function BookingForm({ onSubmit, editingBooking }: BookingFormProps) {
                                 })
                             }
                         />
+                        {errors.destinationStation && (
+                            <p className="text-sm text-red-600">
+                                {errors.destinationStation}
+                            </p>
+                        )}
                     </div>
                 </div>
             </section>
@@ -121,7 +225,10 @@ function BookingForm({ onSubmit, editingBooking }: BookingFormProps) {
                         </label>
                         <input
                             id="travelDate"
-                            className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition duration-200"
+                            className={`w-full px-4 py-2.5 border rounded-xl outline-none transition ${errors.travelDate
+                                ? "border-red-500 focus:ring-red-500"
+                                : "border-gray-300 focus:ring-blue-500"
+                                }`}
                             type="date"
                             value={booking.schedule.travelDate}
                             onChange={(e) =>
@@ -131,6 +238,11 @@ function BookingForm({ onSubmit, editingBooking }: BookingFormProps) {
                                 })
                             }
                         />
+                        {errors.travelDate && (
+                            <p className="text-sm text-red-600">
+                                {errors.travelDate}
+                            </p>
+                        )}
                     </div>
                     <div className="space-y-1">
                         <label htmlFor="departureTime" className="text-sm font-medium text-gray-700">
@@ -138,7 +250,10 @@ function BookingForm({ onSubmit, editingBooking }: BookingFormProps) {
                         </label>
                         <input
                             id="departureTime"
-                            className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition duration-200"
+                            className={`w-full px-4 py-2.5 border rounded-xl outline-none transition ${errors.departureTime
+                                ? "border-red-500 focus:ring-red-500"
+                                : "border-gray-300 focus:ring-blue-500"
+                                }`}
                             type="time"
                             value={booking.schedule.departureTime}
                             onChange={(e) =>
@@ -148,6 +263,11 @@ function BookingForm({ onSubmit, editingBooking }: BookingFormProps) {
                                 })
                             }
                         />
+                        {errors.departureTime && (
+                            <p className="text-sm text-red-600">
+                                {errors.departureTime}
+                            </p>
+                        )}
                     </div>
                     <div className="space-y-1">
                         <label htmlFor="arrivalTime" className="text-sm font-medium text-gray-700">
@@ -155,7 +275,10 @@ function BookingForm({ onSubmit, editingBooking }: BookingFormProps) {
                         </label>
                         <input
                             id="arrivalTime"
-                            className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition duration-200"
+                            className={`w-full px-4 py-2.5 border rounded-xl outline-none transition ${errors.arrivalTime
+                                ? "border-red-500 focus:ring-red-500"
+                                : "border-gray-300 focus:ring-blue-500"
+                                }`}
                             type="time"
                             value={booking.schedule.arrivalTime}
                             onChange={(e) =>
@@ -165,6 +288,11 @@ function BookingForm({ onSubmit, editingBooking }: BookingFormProps) {
                                 })
                             }
                         />
+                        {errors.arrivalTime && (
+                            <p className="text-sm text-red-600">
+                                {errors.arrivalTime}
+                            </p>
+                        )}
                     </div>
                 </div>
             </section>
@@ -179,7 +307,10 @@ function BookingForm({ onSubmit, editingBooking }: BookingFormProps) {
                         </label>
                         <input
                             id="seatNumber"
-                            className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition duration-200 placeholder-gray-400"
+                            className={`w-full px-4 py-2.5 border rounded-xl outline-none transition ${errors.seatNumber
+                                ? "border-red-500 focus:ring-red-500"
+                                : "border-gray-300 focus:ring-blue-500"
+                                }`}
                             placeholder="e.g. 12A"
                             value={booking.seatNumber}
                             onChange={(e) =>
@@ -188,7 +319,11 @@ function BookingForm({ onSubmit, editingBooking }: BookingFormProps) {
                                     seatNumber: e.target.value
                                 })
                             }
-                        />
+                        />{errors.seatNumber && (
+                            <p className="text-sm text-red-600">
+                                {errors.seatNumber}
+                            </p>
+                        )}
                     </div>
                     <div className="space-y-1">
                         <label htmlFor="ticketPrice" className="text-sm font-medium text-gray-700">
@@ -196,7 +331,10 @@ function BookingForm({ onSubmit, editingBooking }: BookingFormProps) {
                         </label>
                         <input
                             id="ticketPrice"
-                            className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition duration-200 placeholder-gray-400"
+                            className={`w-full px-4 py-2.5 border rounded-xl outline-none transition ${errors.ticketPrice
+                                ? "border-red-500 focus:ring-red-500"
+                                : "border-gray-300 focus:ring-blue-500"
+                                }`}
                             type="number"
                             placeholder="0.00"
                             value={booking.ticketPrice}
@@ -207,6 +345,11 @@ function BookingForm({ onSubmit, editingBooking }: BookingFormProps) {
                                 })
                             }
                         />
+                        {errors.ticketPrice && (
+                            <p className="text-sm text-red-600">
+                                {errors.ticketPrice}
+                            </p>
+                        )}
                     </div>
                 </div>
             </section>
