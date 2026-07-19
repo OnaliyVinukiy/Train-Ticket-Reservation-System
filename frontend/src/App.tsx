@@ -6,6 +6,7 @@ import Dashboard from "./pages/Dashboard";
 import Schedules from "./pages/Schedule";
 import Requests from "./pages/Requests";
 import Reports from "./pages/Reports";
+import Chatbot from "./pages/Chatbot";
 
 function App() {
   return (
@@ -31,6 +32,10 @@ function App() {
           <Route
             path="/reports"
             element={<Reports />}
+          />
+          <Route
+            path="/chatbot"
+            element={<Chatbot />}
           />
         </Route>
       </Routes>
