@@ -35,13 +35,11 @@ builder.Services.AddControllers()
     });
 
 
-builder.Services.AddDbContext<AppDbContext>(
-    options =>
-    {
-        options.UseSqlite(
-            "Data Source=TrainTicket.db"
-        );
-    });
+builder.Services.AddDbContext<AppDbContext>(options =>
+{
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("DefaultConnection"));
+});
 
 
 // Repository registrations
