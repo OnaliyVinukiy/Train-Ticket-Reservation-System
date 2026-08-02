@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
 
 using TrainTicket.API.Data;
-using TrainTicket.API.Models;
+using Shared.Models;
 using TrainTicket.API.Repositories;
 using TrainTicket.API.Services;
 
