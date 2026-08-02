@@ -1,4 +1,4 @@
-namespace TrainTicket.API.Models;
+namespace Shared.Models;
 
 public enum RecurrencePattern
 {
