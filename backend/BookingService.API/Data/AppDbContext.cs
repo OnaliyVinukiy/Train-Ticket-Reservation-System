@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
-using TrainTicket.API.Models;
-using Route = TrainTicket.API.Models.Route;
+using Shared.Models;
+using Route = Shared.Models.Route;
 
 
 namespace TrainTicket.API.Data;
