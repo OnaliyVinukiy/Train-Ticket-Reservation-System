@@ -1,51 +1,39 @@
-using TrainTicket.API.Models;
-using TrainTicket.API.Repositories;
+using BookingService.API.Models;
+using BookingService.API.Repositories;
 
-
-namespace TrainTicket.API.Services;
+namespace BookingService.API.Services;
 
 public class SpecialRequestService
 {
-    private readonly IRepository<SpecialRequest> repository;
+    private readonly SpecialRequestRepository repository;
 
-
-    public SpecialRequestService(
-        IRepository<SpecialRequest> repository)
+    public SpecialRequestService(SpecialRequestRepository repository)
     {
         this.repository = repository;
     }
 
-
-    public IEnumerable<SpecialRequest> GetRequests()
+    public List<SpecialRequest> GetRequests()
     {
-        return repository.GetAll();
+        return repository.GetRequests();
     }
-
 
     public SpecialRequest? GetRequest(int id)
     {
-        return repository.GetById(id);
+        return repository.GetRequest(id);
     }
 
-
-    public SpecialRequest CreateRequest(
-        SpecialRequest request)
+    public SpecialRequest CreateRequest(SpecialRequest request)
     {
-        repository.Add(request);
-
-        return request;
+        return repository.CreateRequest(request);
     }
 
-
-    public void UpdateRequest(
-        SpecialRequest request)
+    public void UpdateRequest(SpecialRequest request)
     {
-        repository.Update(request);
+        repository.UpdateRequest(request);
     }
-
 
     public void DeleteRequest(int id)
     {
-        repository.Delete(id);
+        repository.DeleteRequest(id);
     }
 }
