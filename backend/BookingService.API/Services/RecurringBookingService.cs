@@ -30,26 +30,53 @@ public class RecurringBookingService
             {
                 var booking = new Booking
                 {
-                    BookingReference = Guid.NewGuid().ToString().Substring(0, 8).ToUpper(),
+                    BookingReference = Guid.NewGuid()
+        .ToString()
+        .Substring(0, 8)
+        .ToUpper(),
+
                     SeatNumber = recurringBooking.SeatNumber,
+
                     TicketPrice = recurringBooking.TicketPrice,
-                    BookingType = BookingType.OneOff,
+
+                    BookingType = BookingType.Recurring,
+
+                    RecurrencePattern =
+        recurringBooking.RecurrencePattern,
+
+                    RecurrenceEndDate =
+        recurringBooking.RecurrenceEndDate,
+
+
                     Route = new Models.Route
                     {
-                        DepartureStation = recurringBooking.Route.DepartureStation,
-                        DestinationStation = recurringBooking.Route.DestinationStation
+                        DepartureStation =
+            recurringBooking.Route.DepartureStation,
+
+                        DestinationStation =
+            recurringBooking.Route.DestinationStation
                     },
+
                     Schedule = new Schedule
                     {
                         TravelDate = currentDate,
-                        DepartureTime = recurringBooking.Schedule.DepartureTime,
-                        ArrivalTime = recurringBooking.Schedule.ArrivalTime
-                    },
-                    SpecialRequests = recurringBooking.SpecialRequests
-                        .Select(x => new SpecialRequest { Description = x.Description })
-                        .ToList()
-                };
 
+                        DepartureTime =
+            recurringBooking.Schedule.DepartureTime,
+
+                        ArrivalTime =
+            recurringBooking.Schedule.ArrivalTime
+                    },
+
+
+                    SpecialRequests =
+        recurringBooking.SpecialRequests
+        .Select(x => new SpecialRequest
+        {
+            Description = x.Description
+        })
+        .ToList()
+                };
                 repository.CreateBooking(booking);
                 generatedBookings.Add(booking);
             }
