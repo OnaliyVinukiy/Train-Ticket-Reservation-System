@@ -25,35 +25,25 @@ public class AppDbContext : DbContext
 
     public DbSet<SpecialRequest> SpecialRequests { get; set; }
 
-
-
-    protected override void OnModelCreating(
-        ModelBuilder modelBuilder
-    )
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-
         modelBuilder.Entity<Booking>()
             .HasOne(b => b.Route)
-            .WithMany()
-            .HasForeignKey(b => b.RouteId)
-            .OnDelete(DeleteBehavior.Cascade);
-
-
+            .WithMany(r => r.Bookings)
+            .HasForeignKey(b => b.RouteId);
 
         modelBuilder.Entity<Booking>()
             .HasOne(b => b.Schedule)
-            .WithMany()
-            .HasForeignKey(b => b.ScheduleId)
-            .OnDelete(DeleteBehavior.Cascade);
-
-
+            .WithMany(s => s.Bookings)
+            .HasForeignKey(b => b.ScheduleId);
 
         modelBuilder.Entity<SpecialRequest>()
-            .HasOne(r => r.Booking)
+            .HasOne(s => s.Booking)
             .WithMany(b => b.SpecialRequests)
-            .HasForeignKey(r => r.BookingId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .HasForeignKey(s => s.BookingId);
 
+        modelBuilder.Entity<Booking>()
+            .Property(b => b.TicketPrice)
+            .HasPrecision(18, 2);
     }
-
 }
