@@ -1,7 +1,7 @@
-using TrainTicket.API.Models;
-using Route = TrainTicket.API.Models.Route;
+using BookingService.API.Models;
+using Route = BookingService.API.Models.Route;
 
-namespace TrainTicket.API.Data;
+namespace BookingService.API.Data;
 
 public static class DataSeeder
 {
