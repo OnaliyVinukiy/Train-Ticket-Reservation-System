@@ -4,7 +4,6 @@ using BookingService.API.Models;
 
 namespace BookingService.API.Repositories;
 
-
 public class BookingRepository
 {
     private readonly AppDbContext context;
@@ -25,7 +24,6 @@ public class BookingRepository
             .Include(b => b.SpecialRequests)
             .ToList();
     }
-
 
 
     public Booking? GetBooking(int id)
@@ -49,33 +47,96 @@ public class BookingRepository
     }
 
 
-    public void UpdateBooking(
-        Booking booking)
+    public void UpdateBooking(Booking booking)
     {
-        var existing =
-            context.Bookings
-            .FirstOrDefault(x => x.Id == booking.Id);
+        var existingBooking = context.Bookings
+            .Include(b => b.Route)
+            .Include(b => b.Schedule)
+            .Include(b => b.SpecialRequests)
+            .FirstOrDefault(b => b.Id == booking.Id);
 
 
-        if (existing == null)
+        if (existingBooking == null)
             return;
 
-
-        existing.SeatNumber =
+        // Update booking details
+        existingBooking.SeatNumber =
             booking.SeatNumber;
 
-
-        existing.TicketPrice =
+        existingBooking.TicketPrice =
             booking.TicketPrice;
 
-
-        existing.BookingType =
+        existingBooking.BookingType =
             booking.BookingType;
 
 
+        // Update route
+        existingBooking.Route.DepartureStation =
+            booking.Route.DepartureStation;
+
+        existingBooking.Route.DestinationStation =
+            booking.Route.DestinationStation;
+
+
+
+        // Update schedule
+        existingBooking.Schedule.TravelDate =
+            booking.Schedule.TravelDate;
+
+        existingBooking.Schedule.DepartureTime =
+            booking.Schedule.DepartureTime;
+
+        existingBooking.Schedule.ArrivalTime =
+            booking.Schedule.ArrivalTime;
+
+
+        // -----------------------------
+        // Update Special Requests
+        // -----------------------------
+
+        // Remove unchecked requests
+        var removedRequests =
+            existingBooking.SpecialRequests
+            .Where(existing =>
+                !booking.SpecialRequests
+                .Any(updated =>
+                    updated.Id == existing.Id))
+            .ToList();
+
+
+        foreach (var request in removedRequests)
+        {
+            context.SpecialRequests.Remove(request);
+        }
+
+
+        // Update existing and add new requests
+        foreach (var request in booking.SpecialRequests)
+        {
+            var existingRequest =
+                existingBooking.SpecialRequests
+                .FirstOrDefault(x => x.Id == request.Id);
+
+
+            if (existingRequest != null)
+            {
+                // Existing request edited
+                existingRequest.Description =
+                    request.Description;
+            }
+            else
+            {
+                // New request added
+                existingBooking.SpecialRequests.Add(
+                    new SpecialRequest
+                    {
+                        Description = request.Description
+                    });
+            }
+        }
+
         context.SaveChanges();
     }
-
 
     public void DeleteBooking(
         int id)
@@ -91,7 +152,6 @@ public class BookingRepository
             context.SaveChanges();
         }
     }
-
 
     public bool BookingExists(
         DateTime date,
