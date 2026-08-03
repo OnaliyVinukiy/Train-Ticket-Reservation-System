@@ -1,67 +1,70 @@
 using Microsoft.AspNetCore.Mvc;
-using TrainTicket.API.Models;
-using TrainTicket.API.Services;
+using BookingService.API.DTOs;
+using BookingService.API.Helpers;
+using BookingService.API.Services;
 
-
-namespace TrainTicket.API.Controllers;
-
+namespace BookingService.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
 public class BookingController : ControllerBase
 {
-
-    private readonly BookingService service;
+    private readonly BookingManagementService service;
 
 
     public BookingController(
-        BookingService service
-    )
+        BookingManagementService service)
     {
         this.service = service;
     }
 
 
+
     [HttpGet]
     public IActionResult GetBookings()
     {
+        var bookings = service.GetAllBookings();
+
         return Ok(
-            service.GetAllBookings()
+            bookings.Select(BookingMapper.ToDto)
         );
     }
 
 
+
     [HttpGet("{id}")]
-    public IActionResult GetBooking(
-        int id
-    )
+    public IActionResult GetBooking(int id)
     {
         var booking = service.GetBookingById(id);
 
 
         if (booking == null)
         {
-            return NotFound(
-                new
-                {
-                    message = "Booking not found"
-                }
-            );
+            return NotFound(new
+            {
+                message = "Booking not found"
+            });
         }
 
 
-        return Ok(booking);
+        return Ok(
+            BookingMapper.ToDto(booking)
+        );
     }
+
 
 
 
     [HttpPost]
     public IActionResult CreateBooking(
-        Booking booking
-    )
+        BookingDto dto)
     {
+        var booking =
+            BookingMapper.ToModel(dto);
 
-        var created = service.CreateBooking(booking);
+
+        var created =
+            service.CreateBooking(booking);
 
 
         return CreatedAtAction(
@@ -70,53 +73,62 @@ public class BookingController : ControllerBase
             {
                 id = created.Id
             },
-            created
+            BookingMapper.ToDto(created)
         );
-
     }
+
+
 
 
     [HttpPut("{id}")]
     public IActionResult UpdateBooking(
         int id,
-        Booking booking
-    )
+        BookingDto dto)
     {
+        var existing =
+            service.GetBookingById(id);
 
-        if (id != booking.Id)
+
+        if(existing == null)
         {
-            return BadRequest(
-                new
-                {
-                    message = "Booking ID mismatch"
-                }
-            );
+            return NotFound(new
+            {
+                message = "Booking not found"
+            });
         }
 
 
+        var booking =
+            BookingMapper.ToModel(dto);
+
+
+        booking.Id = id;
+
+
         service.UpdateBooking(booking);
+
 
         return NoContent();
     }
 
 
+
+
+
     [HttpDelete("{id}")]
     public IActionResult DeleteBooking(
-        int id
-    )
+        int id)
     {
+        var booking =
+            service.GetBookingById(id);
 
-        var booking = service.GetBookingById(id);
 
-
-        if (booking == null)
+        if(booking == null)
         {
-            return NotFound(
-                new
-                {
-                    message = "Booking not found"
-                }
-            );
+            return NotFound(new
+            {
+                message = "Booking not found"
+            });
         }
 
 
@@ -124,43 +136,28 @@ public class BookingController : ControllerBase
 
 
         return NoContent();
-
     }
+
+
+
+
 
     [HttpGet("search")]
     public IActionResult SearchBookings(
         string? date,
         string? route,
-        string? reference
-    )
+        string? reference)
     {
-
-        var bookings = service.SearchBookings(
-            date,
-            route,
-            reference
-        );
-
-
-        return Ok(bookings);
-
-    }
-
-    [HttpGet("total-cost")]
-    public IActionResult GetTotalCost()
-    {
-
-        var total = service.GetAllBookings()
-            .Sum(x => x.TicketPrice);
+        var bookings =
+            service.SearchBookings(
+                date,
+                route,
+                reference
+            );
 
 
         return Ok(
-            new
-            {
-                totalCost = total
-            }
+            bookings.Select(BookingMapper.ToDto)
         );
-
     }
-
 }
