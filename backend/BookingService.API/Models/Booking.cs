@@ -12,16 +12,19 @@ public class Booking
 
     public BookingType BookingType { get; set; }
 
+    public RecurrencePattern RecurrencePattern { get; set; }
+        = RecurrencePattern.None;
+
+    public DateTime? RecurrenceEndDate { get; set; }
 
     public int RouteId { get; set; }
 
     public Route Route { get; set; } = null!;
 
-
     public int ScheduleId { get; set; }
 
     public Schedule Schedule { get; set; } = null!;
 
-
-    public List<SpecialRequest> SpecialRequests { get; set; } = new();
+    public List<SpecialRequest> SpecialRequests { get; set; }
+        = new();
 }
