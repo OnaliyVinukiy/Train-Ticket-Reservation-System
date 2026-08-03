@@ -3,10 +3,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace TrainTicket.API.Migrations
+namespace BookingService.API.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialSqlServer : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -48,12 +48,10 @@ namespace TrainTicket.API.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     BookingReference = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     SeatNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    TicketPrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    TicketPrice = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
                     BookingType = table.Column<int>(type: "int", nullable: false),
                     RouteId = table.Column<int>(type: "int", nullable: false),
-                    ScheduleId = table.Column<int>(type: "int", nullable: false),
-                    RouteId1 = table.Column<int>(type: "int", nullable: true),
-                    ScheduleId1 = table.Column<int>(type: "int", nullable: true)
+                    ScheduleId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -65,21 +63,11 @@ namespace TrainTicket.API.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Bookings_Routes_RouteId1",
-                        column: x => x.RouteId1,
-                        principalTable: "Routes",
-                        principalColumn: "Id");
-                    table.ForeignKey(
                         name: "FK_Bookings_Schedules_ScheduleId",
                         column: x => x.ScheduleId,
                         principalTable: "Schedules",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Bookings_Schedules_ScheduleId1",
-                        column: x => x.ScheduleId1,
-                        principalTable: "Schedules",
-                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -108,19 +96,9 @@ namespace TrainTicket.API.Migrations
                 column: "RouteId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Bookings_RouteId1",
-                table: "Bookings",
-                column: "RouteId1");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Bookings_ScheduleId",
                 table: "Bookings",
                 column: "ScheduleId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Bookings_ScheduleId1",
-                table: "Bookings",
-                column: "ScheduleId1");
 
             migrationBuilder.CreateIndex(
                 name: "IX_SpecialRequests_BookingId",
