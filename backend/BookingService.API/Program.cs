@@ -72,14 +72,12 @@ using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-    context.Database.Migrate();
-
     DataSeeder.Seed(context);
 }
 
 app.UseCors("AllowReact");
 
-if (app.Environment.IsDevelopment())
+if (true)
 {
     app.UseSwagger();
     app.UseSwaggerUI();

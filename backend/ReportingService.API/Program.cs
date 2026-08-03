@@ -29,7 +29,7 @@ builder.Services.AddScoped<ReportService>();
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
+if (true)
 {
     app.UseSwagger();
     app.UseSwaggerUI();
