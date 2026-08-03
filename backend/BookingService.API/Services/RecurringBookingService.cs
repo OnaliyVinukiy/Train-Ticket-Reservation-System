@@ -1,7 +1,7 @@
-using TrainTicket.API.Models;
-using TrainTicket.API.Repositories;
+using BookingService.API.Models;
+using BookingService.API.Repositories;
 
-namespace TrainTicket.API.Services;
+namespace BookingService.API.Services;
 
 public class RecurringBookingService
 {
