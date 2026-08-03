@@ -1,22 +1,22 @@
-import api from "./api";
+import bookingApi from "./bookingApi";
 import type { Booking } from "../types/booking";
 
 export const getBookings = async () => {
-    const response = await api.get<Booking[]>("/booking");
+    const response = await bookingApi.get<Booking[]>("/booking");
     return response.data;
 };
 
 export const createBooking = async (booking: Booking) => {
-    const response = await api.post("/booking", booking);
+    const response = await bookingApi.post("/booking", booking);
     return response.data;
 };
 
 export const updateBooking = async (id: number, booking: Booking) => {
-    await api.put(`/booking/${id}`, booking);
+    await bookingApi.put(`/booking/${id}`, booking);
 };
 
 export const deleteBooking = async (id: number) => {
-    await api.delete(`/booking/${id}`);
+    await bookingApi.delete(`/booking/${id}`);
 };
 
 export const searchBookings = async (
@@ -25,7 +25,7 @@ export const searchBookings = async (
     reference?: string
 ) => {
 
-    const response = await api.get(
+    const response = await bookingApi.get(
         "/booking/search",
         {
             params: {
