@@ -7,10 +7,14 @@ public class BookingManagementService
 {
     private readonly BookingRepository repository;
 
+    private readonly RecurringBookingService recurringService;
+
     public BookingManagementService(
-        BookingRepository repository)
+    BookingRepository repository,
+    RecurringBookingService recurringService)
     {
         this.repository = repository;
+        this.recurringService = recurringService;
     }
 
 
@@ -84,5 +88,11 @@ public class BookingManagementService
 
 
         return bookings;
+    }
+
+    public List<Booking> GenerateRecurringBookings(
+    RecurringBooking booking)
+    {
+        return recurringService.GenerateRecurringBookings(booking);
     }
 }
