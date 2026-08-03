@@ -1,17 +1,21 @@
 using Microsoft.EntityFrameworkCore;
-using TrainTicket.API.Data;
-using TrainTicket.API.Models;
+using BookingService.API.Data;
+using BookingService.API.Models;
 
-namespace TrainTicket.API.Repositories;
+namespace BookingService.API.Repositories;
+
 
 public class BookingRepository
 {
     private readonly AppDbContext context;
 
-    public BookingRepository(AppDbContext context)
+
+    public BookingRepository(
+        AppDbContext context)
     {
         this.context = context;
     }
+
 
     public List<Booking> GetAllBookings()
     {
@@ -22,6 +26,8 @@ public class BookingRepository
             .ToList();
     }
 
+
+
     public Booking? GetBooking(int id)
     {
         return context.Bookings
@@ -31,30 +37,54 @@ public class BookingRepository
             .FirstOrDefault(b => b.Id == id);
     }
 
-    public Booking CreateBooking(Booking booking)
+
+    public Booking CreateBooking(
+        Booking booking)
     {
-        context.Routes.Add(booking.Route);
-        context.Schedules.Add(booking.Schedule);
-        context.SaveChanges();
-
-        booking.RouteId = booking.Route.Id;
-        booking.ScheduleId = booking.Schedule.Id;
-
         context.Bookings.Add(booking);
+
         context.SaveChanges();
 
         return booking;
     }
 
-    public void UpdateBooking(Booking booking)
+
+    public void UpdateBooking(
+        Booking booking)
     {
-        context.Bookings.Update(booking);
+        var existing =
+            context.Bookings
+            .FirstOrDefault(x => x.Id == booking.Id);
+
+
+        if (existing == null)
+            return;
+
+
+        existing.SeatNumber =
+            booking.SeatNumber;
+
+
+        existing.TicketPrice =
+            booking.TicketPrice;
+
+
+        existing.BookingType =
+            booking.BookingType;
+
+
         context.SaveChanges();
     }
 
-    public void DeleteBooking(int id)
+
+    public void DeleteBooking(
+        int id)
     {
-        var booking = context.Bookings.FirstOrDefault(x => x.Id == id);
+        var booking =
+            context.Bookings
+            .FirstOrDefault(x => x.Id == id);
+
+
         if (booking != null)
         {
             context.Bookings.Remove(booking);
@@ -62,24 +92,21 @@ public class BookingRepository
         }
     }
 
+
     public bool BookingExists(
-    DateTime date,
-    string departure,
-    string destination
-)
-{
-
-    return context.Bookings
-        .Include(b => b.Route)
-        .Include(b => b.Schedule)
-        .Any(
-            b =>
-            b.Schedule.TravelDate == date
-            &&
-            b.Route.DepartureStation == departure
-            &&
-            b.Route.DestinationStation == destination
-        );
-
-}
+        DateTime date,
+        string departure,
+        string destination)
+    {
+        return context.Bookings
+            .Include(b => b.Route)
+            .Include(b => b.Schedule)
+            .Any(b =>
+                b.Schedule.TravelDate.Date == date.Date
+                &&
+                b.Route.DepartureStation == departure
+                &&
+                b.Route.DestinationStation == destination
+            );
+    }
 }
