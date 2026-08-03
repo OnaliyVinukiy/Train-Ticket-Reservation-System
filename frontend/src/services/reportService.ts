@@ -1,27 +1,27 @@
-import api from "./api";
+import reportApi from "./reportApi";
 
 export const getWeeklyReport = async (startDate: string) => {
-    const response = await api.get("/report/weekly", { params: { startDate } });
+    const response = await reportApi.get("/report/weekly", { params: { startDate } });
     return response.data;
 };
 
 export const getBookingReport = async (fromDate: string, toDate: string, route?: string, bookingType?: string) => {
-    const response = await api.get("/report/bookings", { params: { fromDate, toDate, route, bookingType } });
+    const response = await reportApi.get("/report/bookings", { params: { fromDate, toDate, route, bookingType } });
     return response.data;
 };
 
 export const getRouteFrequency = async (fromDate: string, toDate: string) => {
-    const response = await api.get("/report/route-frequency", { params: { fromDate, toDate } });
+    const response = await reportApi.get("/report/route-frequency", { params: { fromDate, toDate } });
     return response.data;
 };
 
 export const getWeeklySummary = async (startDate: string) => {
-    const response = await api.get("/report/summary", { params: { startDate } });
+    const response = await reportApi.get("/report/summary", { params: { startDate } });
     return response.data;
 };
 
 export const exportCSV = async (fromDate: string, toDate: string) => {
-    const response = await api.get("/report/export", {
+    const response = await reportApi.get("/report/export", {
         params: { fromDate, toDate },
         responseType: "blob"
     });
