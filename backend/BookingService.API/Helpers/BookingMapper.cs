@@ -16,6 +16,10 @@ public static class BookingMapper
 
             BookingType = dto.BookingType,
 
+            RecurrencePattern = dto.RecurrencePattern,
+
+            RecurrenceEndDate = dto.RecurrenceEndDate,
+
 
             Route = new Route
             {
@@ -44,6 +48,7 @@ public static class BookingMapper
                 dto.SpecialRequests?
                 .Select(x => new SpecialRequest
                 {
+                    Id = x.Id,
                     Description = x.Description
                 })
                 .ToList()
@@ -52,17 +57,23 @@ public static class BookingMapper
         };
     }
 
-
-
     public static BookingDto ToDto(Booking booking)
     {
         return new BookingDto
         {
+            Id = booking.Id,
+
+            BookingReference = booking.BookingReference,
+
             SeatNumber = booking.SeatNumber,
 
             TicketPrice = booking.TicketPrice,
 
             BookingType = booking.BookingType,
+
+            RecurrencePattern = booking.RecurrencePattern,
+
+            RecurrenceEndDate = booking.RecurrenceEndDate,
 
 
             Route = new RouteDto
@@ -94,6 +105,7 @@ public static class BookingMapper
                 booking.SpecialRequests
                 .Select(x => new SpecialRequestDto
                 {
+                    Id = x.Id,
                     Description = x.Description
                 })
                 .ToList()
