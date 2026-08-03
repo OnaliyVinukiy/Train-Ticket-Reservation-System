@@ -1,4 +1,4 @@
-import api from "./api";
+import api from "./bookingApi";
 import type { SpecialRequest } from "../types/specialRequest";
 
 
