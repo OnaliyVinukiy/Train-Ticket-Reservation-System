@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
-using TrainTicket.API.Models.DTOs;
-using TrainTicket.API.Services;
+using PredictionService.API.DTOs;
+using PredictionService.API.Services;
 
-namespace TrainTicket.API.Controllers;
+namespace PredictionService.API.Controllers;
 
 [ApiController]
 [Route("api/chatbot")]
