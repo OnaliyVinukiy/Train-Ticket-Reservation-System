@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
-using TrainTicket.API.Models;
-using TrainTicket.API.Services;
+using BookingService.API.Models;
+using BookingService.API.Services;
 
-namespace TrainTicket.API.Controllers;
+namespace BookingService.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -10,15 +10,22 @@ public class RecurringBookingController : ControllerBase
 {
     private readonly RecurringBookingService service;
 
-    public RecurringBookingController(RecurringBookingService service)
+
+    public RecurringBookingController(
+        RecurringBookingService service)
     {
         this.service = service;
     }
 
+
     [HttpPost("generate")]
-    public IActionResult Generate(RecurringBooking booking)
+    public IActionResult Generate(
+        RecurringBooking booking)
     {
-        var bookings = service.GenerateRecurringBookings(booking);
+        var bookings =
+            service.GenerateRecurringBookings(booking);
+
+
         return Ok(new
         {
             message = "Recurring bookings generated successfully",
