@@ -1,4 +1,4 @@
-import api from "./api";
+import api from "./bookingApi";
 import type { Schedule } from "../types/schedule";
 
 
