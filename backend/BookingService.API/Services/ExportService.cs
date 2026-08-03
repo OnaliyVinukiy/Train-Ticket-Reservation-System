@@ -1,7 +1,7 @@
 using System.Text;
-using TrainTicket.API.Models;
+using BookingService.API.Models;
 
-namespace TrainTicket.API.Services;
+namespace BookingService.API.Services;
 
 public class ExportService
 {
