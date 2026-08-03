@@ -1,10 +1,11 @@
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
 
-using TrainTicket.API.Data;
-using Shared.Models;
-using TrainTicket.API.Repositories;
-using TrainTicket.API.Services;
+using BookingService.API.Data;
+using BookingService.API.Models;
+
+using BookingService.API.Repositories;
+using BookingService.API.Services;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -44,15 +45,11 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 // Repository registrations
 
-builder.Services.AddScoped<IRepository<Schedule>, EFRepository<Schedule>>();
-
-builder.Services.AddScoped<IRepository<SpecialRequest>, EFRepository<SpecialRequest>>();
-
 builder.Services.AddScoped<BookingRepository>();
 
 
 // Services
-builder.Services.AddScoped<BookingService>();
+builder.Services.AddScoped<BookingManagementService>();
 
 builder.Services.AddScoped<ScheduleService>();
 
@@ -60,13 +57,7 @@ builder.Services.AddScoped<SpecialRequestService>();
 
 builder.Services.AddScoped<RecurringBookingService>();
 
-builder.Services.AddScoped<ReportService>();
-
 builder.Services.AddScoped<ExportService>();
-
-builder.Services.AddScoped<ChatbotService>();
-
-builder.Services.AddScoped<PredictionService>();
 
 builder.Services.AddEndpointsApiExplorer();
 
