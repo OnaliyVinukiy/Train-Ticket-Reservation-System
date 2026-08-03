@@ -1,18 +1,16 @@
 using System.Text.RegularExpressions;
-using TrainTicket.API.Models;
-using TrainTicket.API.Models.DTOs;
+using PredictionService.API.Models;
 
-namespace TrainTicket.API.Services;
+
+namespace PredictionService.API.Services;
 
 public class ChatbotService
 {
-    private readonly PredictionService predictionService;
-    private readonly ReportService reportService;
+    private readonly PredictionManagementService predictionService;
 
-    public ChatbotService(PredictionService predictionService, ReportService reportService)
+    public ChatbotService(PredictionManagementService predictionService)
     {
         this.predictionService = predictionService;
-        this.reportService = reportService;
     }
 
     public object ProcessMessage(string message)
@@ -29,9 +27,7 @@ public class ChatbotService
                         "Hello! I can predict train availability and ticket price trends.\n\n" +
                         "Try asking:\n" +
                         "• Will Colombo to Kandy be available tomorrow?\n" +
-                        "• Predict ticket prices for Galle to Colombo\n" +
-                        "• What is the most popular route?\n" +
-                        "• Show this week's summary"
+                        "• Predict ticket prices for Galle to Colombo"
                 };
 
             case ChatIntent.Help:
@@ -40,34 +36,9 @@ public class ChatbotService
                     reply =
                         "You can ask me things like:\n\n" +
                         "• Will Colombo to Kandy be available tomorrow?\n" +
-                        "• Predict prices for Colombo to Badulla\n" +
-                        "• Which route is busiest?\n" +
-                        "• Show weekly summary"
-                };
-
-            case ChatIntent.PopularRoute:
-                var summary = reportService.GetWeeklySummary(DateTime.Today);
-                return new
-                {
-                    reply = $"The most popular route this week is {summary.MostPopularRoute}."
-                };
-
-            case ChatIntent.WeeklySummary:
-                var weekly = reportService.GetWeeklySummary(DateTime.Today);
-                return new
-                {
-                    reply =
-$"""
-Weekly Summary
-
-Bookings : {weekly.TotalBookings}
-
-Total Cost : Rs. {weekly.TotalTicketCost}
-
-Special Requests : {weekly.TotalSpecialRequests}
-
-Most Popular Route : {weekly.MostPopularRoute}
-"""
+                        "• Predict prices for Colombo to Galle\n" +
+                        "• Will Colombo to Kandy have seats tomorrow?\n" +
+                        "• Predict prices for Colombo to Galle"
                 };
 
             case ChatIntent.Availability:
@@ -135,12 +106,6 @@ Recommendation:
         if (message.Contains("help"))
             return ChatIntent.Help;
 
-        if (message.Contains("popular route") || message.Contains("busiest"))
-            return ChatIntent.PopularRoute;
-
-        if (message.Contains("summary"))
-            return ChatIntent.WeeklySummary;
-
         if (message.Contains("price"))
             return ChatIntent.PriceTrend;
 
@@ -203,16 +168,4 @@ Recommendation:
 
         return DateTime.Today;
     }
-}
-
-public enum ChatIntent
-{
-    Unknown,
-    Greeting,
-    Help,
-    Availability,
-    PriceTrend,
-    Recommendation,
-    PopularRoute,
-    WeeklySummary
 }
