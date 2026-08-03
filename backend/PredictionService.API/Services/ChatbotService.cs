@@ -1,5 +1,6 @@
 using System.Text.RegularExpressions;
 using PredictionService.API.Models;
+using PredictionService.API.DTOs;
 
 
 namespace PredictionService.API.Services;
@@ -13,7 +14,7 @@ public class ChatbotService
         this.predictionService = predictionService;
     }
 
-    public object ProcessMessage(string message)
+    public ChatbotResponseDto ProcessMessage(string message)
     {
         message = message.Trim();
         ChatIntent intent = DetectIntent(message);
@@ -21,19 +22,22 @@ public class ChatbotService
         switch (intent)
         {
             case ChatIntent.Greeting:
-                return new
+                return new ChatbotResponseDto
                 {
-                    reply =
-                        "Hello! I can predict train availability and ticket price trends.\n\n" +
-                        "Try asking:\n" +
-                        "• Will Colombo to Kandy be available tomorrow?\n" +
-                        "• Predict ticket prices for Galle to Colombo"
+                    Reply =
+                    """
+                    Hello! I can help predict train availability and ticket prices.
+
+                    Try asking:
+                    • Will Colombo to Kandy be available tomorrow?
+                    • Predict prices for Galle to Colombo
+                    """
                 };
 
             case ChatIntent.Help:
-                return new
+                return new ChatbotResponseDto
                 {
-                    reply =
+                    Reply =
                         "You can ask me things like:\n\n" +
                         "• Will Colombo to Kandy be available tomorrow?\n" +
                         "• Predict prices for Colombo to Galle\n" +
@@ -47,25 +51,25 @@ public class ChatbotService
                 return HandlePrediction(message);
 
             default:
-                return new
+                return new ChatbotResponseDto
                 {
-                    reply =
+                    Reply =
                         "Sorry, I couldn't understand your question. Type 'help' to see what I can do."
                 };
         }
     }
 
-    private object HandlePrediction(string message)
+    private ChatbotResponseDto HandlePrediction(string message)
     {
         string route = ExtractRoute(message);
         DateTime date = ExtractDate(message);
 
         var prediction = predictionService.Predict(route, date, "Any");
 
-        return new
+        return new ChatbotResponseDto
         {
-            reply =
-$"""
+            Reply =
+ $"""
 Prediction Result
 
 Route:
@@ -89,10 +93,14 @@ Reason:
 Recommendation:
 {prediction.Recommendation}
 """,
-            availability = prediction.AvailabilityStatus,
-            priceTrend = prediction.PriceTrend,
-            recommendation = prediction.Recommendation,
-            factors = prediction.Factors
+
+            Availability = prediction.AvailabilityStatus,
+
+            PriceTrend = prediction.PriceTrend,
+
+            Recommendation = prediction.Recommendation,
+
+            Factors = prediction.Factors
         };
     }
 
