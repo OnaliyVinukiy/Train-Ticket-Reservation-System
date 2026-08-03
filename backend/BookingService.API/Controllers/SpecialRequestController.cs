@@ -1,17 +1,15 @@
 using Microsoft.AspNetCore.Mvc;
-using TrainTicket.API.Models;
-using TrainTicket.API.Services;
+using BookingService.API.Models;
+using BookingService.API.Services;
 
-
-namespace TrainTicket.API.Controllers;
-
+namespace BookingService.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
 public class SpecialRequestController : ControllerBase
 {
-
     private readonly SpecialRequestService service;
+
 
     public SpecialRequestController(
         SpecialRequestService service)
@@ -33,9 +31,12 @@ public class SpecialRequestController : ControllerBase
         var request = service.GetRequest(id);
 
 
-        if (request == null)
+        if(request == null)
         {
-            return NotFound();
+            return NotFound(new
+            {
+                message = "Special request not found"
+            });
         }
 
 
@@ -58,14 +59,29 @@ public class SpecialRequestController : ControllerBase
         int id,
         SpecialRequest request)
     {
-
-        if (id != request.Id)
+        if(id != request.Id)
         {
-            return BadRequest();
+            return BadRequest(new
+            {
+                message = "Request ID mismatch"
+            });
+        }
+
+
+        var existing = service.GetRequest(id);
+
+
+        if(existing == null)
+        {
+            return NotFound(new
+            {
+                message = "Special request not found"
+            });
         }
 
 
         service.UpdateRequest(request);
+
 
         return NoContent();
     }
@@ -74,7 +90,20 @@ public class SpecialRequestController : ControllerBase
     [HttpDelete("{id}")]
     public IActionResult DeleteRequest(int id)
     {
+        var request = service.GetRequest(id);
+
+
+        if(request == null)
+        {
+            return NotFound(new
+            {
+                message = "Special request not found"
+            });
+        }
+
+
         service.DeleteRequest(id);
+
 
         return NoContent();
     }
