@@ -36,8 +36,18 @@ function BookingForm({ onSubmit, editingBooking }: BookingFormProps) {
 
     useEffect(() => {
         if (editingBooking) {
-            setBooking(editingBooking);
-            setRequests(editingBooking.specialRequests.map(x => x.description));
+
+            setBooking({
+                ...editingBooking,
+                schedule: {
+                    ...editingBooking.schedule,
+                    travelDate: editingBooking.schedule.travelDate.split("T")[0]
+                }
+            });
+
+            setRequests(
+                editingBooking.specialRequests.map(x => x.description)
+            );
         }
     }, [editingBooking]);
 
@@ -73,12 +83,7 @@ function BookingForm({ onSubmit, editingBooking }: BookingFormProps) {
         if (!booking.schedule.travelDate) {
             newErrors.travelDate = "Travel date is required";
         }
-        else if (
-            new Date(booking.schedule.travelDate) < new Date()
-        ) {
-            newErrors.travelDate =
-                "Travel date cannot be in the past";
-        }
+        
 
 
         if (!booking.schedule.departureTime) {
