@@ -128,39 +128,44 @@ Recommendation:
 
     private string ExtractRoute(string message)
     {
-        var routes = new[]
+        var stations = new[]
         {
-            "Colombo",
-            "Kandy",
-            "Galle",
-            "Jaffna",
-            "Badulla",
-            "Matara",
-            "Anuradhapura",
-            "Kurunegala",
-            "Negombo"
-        };
+        "Colombo Fort",
+        "Kandy",
+        "Galle",
+        "Jaffna",
+        "Badulla",
+        "Matara",
+        "Anuradhapura",
+        "Kurunegala",
+        "Negombo"
+    };
 
         string? departure = null;
         string? destination = null;
 
-        foreach (var station in routes)
+        foreach (var station in stations)
         {
             if (message.Contains(station, StringComparison.OrdinalIgnoreCase))
             {
                 if (departure == null)
                     departure = station;
                 else
+                {
                     destination = station;
+                    break;
+                }
             }
         }
 
         if (departure != null && destination != null)
+        {
+
             return $"{departure} → {destination}";
+        }
 
         return "Unknown Route";
     }
-
     private DateTime ExtractDate(string message)
     {
         message = message.ToLower();
