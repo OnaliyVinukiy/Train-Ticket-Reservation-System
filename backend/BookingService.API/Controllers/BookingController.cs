@@ -12,13 +12,11 @@ public class BookingController : ControllerBase
 {
     private readonly BookingManagementService service;
 
-
     public BookingController(
         BookingManagementService service)
     {
         this.service = service;
     }
-
 
 
     [HttpGet]
@@ -30,7 +28,6 @@ public class BookingController : ControllerBase
             bookings.Select(BookingMapper.ToDto)
         );
     }
-
 
 
     [HttpGet("{id}")]
@@ -91,8 +88,6 @@ public class BookingController : ControllerBase
             });
         }
 
-
-
         var created =
             service.CreateBooking(booking);
 
@@ -106,7 +101,6 @@ public class BookingController : ControllerBase
             BookingMapper.ToDto(created)
         );
     }
-
 
 
     [HttpPut("{id}")]
@@ -141,9 +135,6 @@ public class BookingController : ControllerBase
     }
 
 
-
-
-
     [HttpDelete("{id}")]
     public IActionResult DeleteBooking(
         int id)
@@ -163,12 +154,8 @@ public class BookingController : ControllerBase
 
         service.DeleteBooking(id);
 
-
         return NoContent();
     }
-
-
-
 
 
     [HttpGet("search")]
