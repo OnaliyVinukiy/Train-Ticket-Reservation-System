@@ -1,16 +1,13 @@
 using Microsoft.AspNetCore.Mvc;
-using TrainTicket.API.Models;
-using TrainTicket.API.Services;
+using BookingService.API.Models;
+using BookingService.API.Services;
 
-
-namespace TrainTicket.API.Controllers;
-
+namespace BookingService.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
 public class ScheduleController : ControllerBase
 {
-
     private readonly ScheduleService service;
 
 
@@ -36,12 +33,15 @@ public class ScheduleController : ControllerBase
 
         if (schedule == null)
         {
-            return NotFound();
+            return NotFound(new
+            {
+                message = "Schedule not found"
+            });
         }
+
 
         return Ok(schedule);
     }
-
 
 
     [HttpPost]
@@ -59,24 +59,51 @@ public class ScheduleController : ControllerBase
         int id,
         Schedule schedule)
     {
-
         if (id != schedule.Id)
         {
-            return BadRequest();
+            return BadRequest(new
+            {
+                message = "Schedule ID mismatch"
+            });
         }
 
+
+        var existing = service.GetSchedule(id);
+
+
+        if (existing == null)
+        {
+            return NotFound(new
+            {
+                message = "Schedule not found"
+            });
+        }
+
+
         service.UpdateSchedule(schedule);
+
 
         return NoContent();
     }
 
 
-
-
     [HttpDelete("{id}")]
     public IActionResult DeleteSchedule(int id)
     {
+        var schedule = service.GetSchedule(id);
+
+
+        if (schedule == null)
+        {
+            return NotFound(new
+            {
+                message = "Schedule not found"
+            });
+        }
+
+
         service.DeleteSchedule(id);
+
 
         return NoContent();
     }
