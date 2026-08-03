@@ -1,4 +1,4 @@
-import api from "./api";
+import predictionApi from "./predictionApi";
 
 export interface ChatRequest {
     message: string;
@@ -12,6 +12,6 @@ export interface ChatResponse {
 }
 
 export const sendMessage = async (message: string) => {
-    const response = await api.post<ChatResponse>("/chatbot", { message });
+    const response = await predictionApi.post<ChatResponse>("/chatbot", { message });
     return response.data;
 };
