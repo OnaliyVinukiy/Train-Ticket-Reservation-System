@@ -4,5 +4,6 @@ public enum RecurrencePattern
 {
     Daily,
     Weekly,
-    Monthly
+    Monthly,
+    None
 }
