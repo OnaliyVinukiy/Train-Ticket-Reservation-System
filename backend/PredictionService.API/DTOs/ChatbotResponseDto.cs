@@ -9,4 +9,5 @@ public class ChatbotResponseDto
     public string PriceTrend { get; set; } = "";
 
     public string Recommendation { get; set; } = "";
+    public List<string> Factors { get; set; } = new();
 }
