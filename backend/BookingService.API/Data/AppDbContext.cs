@@ -1,9 +1,9 @@
 using Microsoft.EntityFrameworkCore;
-using Shared.Models;
-using Route = Shared.Models.Route;
+using BookingService.API.Models;
+using Route = BookingService.API.Models.Route;
 
 
-namespace TrainTicket.API.Data;
+namespace BookingService.API.Data;
 
 
 public class AppDbContext : DbContext
