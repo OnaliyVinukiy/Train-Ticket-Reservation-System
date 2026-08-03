@@ -23,10 +23,17 @@ function Schedules() {
     }, []);
 
     const loadSchedules = async () => {
-        const data = await getSchedules();
-        setSchedules(data);
-    };
+    const data = await getSchedules();
 
+    const formattedSchedules = data.map(schedule => ({
+        ...schedule,
+        travelDate: schedule.travelDate.split("T")[0],
+        departureTime: schedule.departureTime.substring(0, 5),
+        arrivalTime: schedule.arrivalTime.substring(0, 5)
+    }));
+
+    setSchedules(formattedSchedules);
+};
     const handleCreate = async () => {
         await createSchedule(newSchedule);
         setNewSchedule({
@@ -44,10 +51,19 @@ function Schedules() {
     };
 
     const handleUpdate = async (schedule: Schedule) => {
-        await updateSchedule(schedule);
-        setEditingId(null);
-        loadSchedules();
+
+    const formattedSchedule = {
+        ...schedule,
+        travelDate: schedule.travelDate,
+        departureTime: `${schedule.departureTime}:00`,
+        arrivalTime: `${schedule.arrivalTime}:00`
     };
+
+    await updateSchedule(formattedSchedule);
+
+    setEditingId(null);
+    loadSchedules();
+};
 
 
     const startEditing = (schedule: Schedule) => {
