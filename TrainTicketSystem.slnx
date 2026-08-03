@@ -3,6 +3,5 @@
     <Project Path="backend/BookingService.API/BookingService.API.csproj" />
     <Project Path="backend/PredictionService.API/PredictionService.API.csproj" />
     <Project Path="backend/ReportingService.API/ReportingService.API.csproj" />
-    <Project Path="backend/Shared/Shared.csproj" />
   </Folder>
 </Solution>
