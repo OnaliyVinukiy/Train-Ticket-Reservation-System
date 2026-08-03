@@ -1,4 +1,4 @@
-namespace TrainTicket.API.Models.DTOs;
+namespace PredictionService.API.DTOs;
 
 public class ChatbotResponseDto
 {
