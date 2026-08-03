@@ -46,6 +46,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 // Repository registrations
 
 builder.Services.AddScoped<BookingRepository>();
+builder.Services.AddScoped<ScheduleRepository>();
+builder.Services.AddScoped<SpecialRequestRepository>();
 
 
 // Services
