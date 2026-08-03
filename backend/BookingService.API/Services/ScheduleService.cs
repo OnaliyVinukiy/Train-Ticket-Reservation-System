@@ -1,47 +1,39 @@
-using TrainTicket.API.Models;
-using TrainTicket.API.Repositories;
+using BookingService.API.Models;
+using BookingService.API.Repositories;
 
-
-namespace TrainTicket.API.Services;
-
+namespace BookingService.API.Services;
 
 public class ScheduleService
 {
-    private readonly IRepository<Schedule> repository;
+    private readonly ScheduleRepository repository;
 
-
-    public ScheduleService(
-        IRepository<Schedule> repository)
+    public ScheduleService(ScheduleRepository repository)
     {
         this.repository = repository;
     }
 
-    public IEnumerable<Schedule> GetSchedules()
+    public List<Schedule> GetSchedules()
     {
-        return repository.GetAll();
+        return repository.GetSchedules();
     }
 
     public Schedule? GetSchedule(int id)
     {
-        return repository.GetById(id);
+        return repository.GetSchedule(id);
     }
 
-    public Schedule CreateSchedule(
-        Schedule schedule)
+    public Schedule CreateSchedule(Schedule schedule)
     {
-        repository.Add(schedule);
-
-        return schedule;
+        return repository.CreateSchedule(schedule);
     }
 
-    public void UpdateSchedule(
-        Schedule schedule)
+    public void UpdateSchedule(Schedule schedule)
     {
-        repository.Update(schedule);
+        repository.UpdateSchedule(schedule);
     }
 
     public void DeleteSchedule(int id)
     {
-        repository.Delete(id);
+        repository.DeleteSchedule(id);
     }
 }
