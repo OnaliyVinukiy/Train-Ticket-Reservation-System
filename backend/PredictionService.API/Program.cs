@@ -20,6 +20,7 @@ builder.Services.AddDbContext<AppDbContext>(
 
 
 builder.Services.AddScoped<PredictionManagementService>();
+builder.Services.AddScoped<ChatbotService>();
 
 
 var app = builder.Build();
