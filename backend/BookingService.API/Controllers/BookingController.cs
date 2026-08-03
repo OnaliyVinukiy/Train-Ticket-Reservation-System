@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using BookingService.API.DTOs;
 using BookingService.API.Helpers;
 using BookingService.API.Services;
+using BookingService.API.Models;
 
 namespace BookingService.API.Controllers;
 
@@ -53,14 +54,43 @@ public class BookingController : ControllerBase
     }
 
 
-
-
     [HttpPost]
     public IActionResult CreateBooking(
-        BookingDto dto)
+    BookingDto dto)
     {
         var booking =
             BookingMapper.ToModel(dto);
+
+
+        if (booking.BookingType == BookingType.Recurring)
+        {
+            var recurringBooking = new RecurringBooking
+            {
+                SeatNumber = booking.SeatNumber,
+                TicketPrice = booking.TicketPrice,
+                RecurrencePattern = booking.RecurrencePattern,
+                RecurrenceEndDate = booking.RecurrenceEndDate,
+
+                Route = booking.Route,
+
+                Schedule = booking.Schedule,
+
+                SpecialRequests = booking.SpecialRequests
+            };
+
+
+            var generated =
+                service.GenerateRecurringBookings(recurringBooking);
+
+
+            return Ok(new
+            {
+                message = "Recurring bookings created successfully",
+                count = generated.Count,
+                bookings = generated
+            });
+        }
+
 
 
         var created =
@@ -79,7 +109,6 @@ public class BookingController : ControllerBase
 
 
 
-
     [HttpPut("{id}")]
     public IActionResult UpdateBooking(
         int id,
@@ -89,7 +118,7 @@ public class BookingController : ControllerBase
             service.GetBookingById(id);
 
 
-        if(existing == null)
+        if (existing == null)
         {
             return NotFound(new
             {
@@ -123,7 +152,7 @@ public class BookingController : ControllerBase
             service.GetBookingById(id);
 
 
-        if(booking == null)
+        if (booking == null)
         {
             return NotFound(new
             {
