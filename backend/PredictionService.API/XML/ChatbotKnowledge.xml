@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<KnowledgeBase>
+
+  <Item>
+    <Keywords>
+      cancel cancellation refund
+    </Keywords>
+
+    <Answer>
+      Tickets can be cancelled according to the cancellation policy. Please contact support for refund processing.
+    </Answer>
+  </Item>
+
+
+  <Item>
+    <Keywords>
+      payment card pay
+    </Keywords>
+
+    <Answer>
+      Payments can be completed through supported online payment methods during booking.
+    </Answer>
+  </Item>
+
+
+  <Item>
+    <Keywords>
+      booking book ticket reserve
+    </Keywords>
+
+    <Answer>
+      Select your route, travel date, seat and booking type to create a reservation.
+    </Answer>
+  </Item>
+
+
+  <Item>
+    <Keywords>
+      route routes destination
+    </Keywords>
+
+    <Answer>
+      Available routes include Colombo Fort to Kandy, Colombo Fort to Galle, Colombo Fort to Jaffna and Kandy to Badulla.
+    </Answer>
+  </Item>
+
+
+</KnowledgeBase>
