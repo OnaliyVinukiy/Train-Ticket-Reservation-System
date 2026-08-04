@@ -25,6 +25,8 @@ builder.Services.AddHostedService(
     provider =>
     provider.GetRequiredService<ReportExportWorker>());
 
+builder.Services.AddScoped<XmlReportConfigurationRepository>();
+
 builder.Services.AddControllers();
 
 builder.Services.AddEndpointsApiExplorer();
