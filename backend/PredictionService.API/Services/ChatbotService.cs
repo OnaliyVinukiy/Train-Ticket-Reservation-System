@@ -14,7 +14,7 @@ public class ChatbotService
         this.predictionService = predictionService;
     }
 
-    public ChatbotResponseDto ProcessMessage(string message)
+    public async Task<ChatbotResponseDto> ProcessMessage(string message)
     {
         message = message.Trim();
         ChatIntent intent = DetectIntent(message);
@@ -48,7 +48,7 @@ public class ChatbotService
             case ChatIntent.Availability:
             case ChatIntent.PriceTrend:
             case ChatIntent.Recommendation:
-                return HandlePrediction(message);
+                return await HandlePrediction(message);
 
             default:
                 return new ChatbotResponseDto
@@ -59,13 +59,16 @@ public class ChatbotService
         }
     }
 
-    private ChatbotResponseDto HandlePrediction(string message)
+    private async Task<ChatbotResponseDto> HandlePrediction(string message)
     {
         string route = ExtractRoute(message);
         DateTime date = ExtractDate(message);
 
-        var prediction = predictionService.Predict(route, date, "Any");
-
+        var prediction =
+     await predictionService.Predict(
+         route,
+         date,
+         "Any");
         return new ChatbotResponseDto
         {
             Reply =
