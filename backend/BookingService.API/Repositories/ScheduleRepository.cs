@@ -8,43 +8,36 @@ public class ScheduleRepository
 {
     private readonly AppDbContext context;
 
-
     public ScheduleRepository(AppDbContext context)
     {
         this.context = context;
     }
 
-
-    public List<Schedule> GetSchedules()
+    public async Task<List<Schedule>> GetSchedules()
     {
-        return context.Schedules
+        return await context.Schedules
             .AsNoTracking()
-            .ToList();
+            .ToListAsync();
     }
 
-
-    public Schedule? GetSchedule(int id)
+    public async Task<Schedule?> GetSchedule(int id)
     {
-        return context.Schedules
-            .FirstOrDefault(x => x.Id == id);
+        return await context.Schedules
+            .FirstOrDefaultAsync(x => x.Id == id);
     }
 
-
-    public Schedule CreateSchedule(Schedule schedule)
+    public async Task<Schedule> CreateSchedule(Schedule schedule)
     {
-        context.Schedules.Add(schedule);
-        context.SaveChanges();
+        await context.Schedules.AddAsync(schedule);
+        await context.SaveChangesAsync();
 
         return schedule;
     }
 
-
-    public void UpdateSchedule(Schedule schedule)
+    public async Task UpdateSchedule(Schedule schedule)
     {
-        var existingSchedule =
-            context.Schedules
-            .FirstOrDefault(x => x.Id == schedule.Id);
-
+        var existingSchedule = await context.Schedules
+            .FirstOrDefaultAsync(x => x.Id == schedule.Id);
 
         if (existingSchedule == null)
         {
@@ -60,22 +53,18 @@ public class ScheduleRepository
         existingSchedule.ArrivalTime =
             schedule.ArrivalTime;
 
-
-        context.SaveChanges();
+        await context.SaveChangesAsync();
     }
 
-
-    public void DeleteSchedule(int id)
+    public async Task DeleteSchedule(int id)
     {
-        var schedule =
-            context.Schedules
-            .FirstOrDefault(x => x.Id == id);
-
+        var schedule = await context.Schedules
+            .FirstOrDefaultAsync(x => x.Id == id);
 
         if (schedule != null)
         {
             context.Schedules.Remove(schedule);
-            context.SaveChanges();
+            await context.SaveChangesAsync();
         }
     }
 }
