@@ -19,6 +19,12 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddScoped<ReportRepository>();
 
+builder.Services.AddSingleton<ReportExportWorker>();
+
+builder.Services.AddHostedService(
+    provider =>
+    provider.GetRequiredService<ReportExportWorker>());
+
 builder.Services.AddControllers();
 
 builder.Services.AddEndpointsApiExplorer();
