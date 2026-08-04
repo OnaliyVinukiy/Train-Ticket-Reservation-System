@@ -19,11 +19,11 @@ public class RecurringBookingController : ControllerBase
 
 
     [HttpPost("generate")]
-    public IActionResult Generate(
+    public async Task<IActionResult> Generate(
         RecurringBooking booking)
     {
         var bookings =
-            service.GenerateRecurringBookings(booking);
+            await service.GenerateRecurringBookings(booking);
 
 
         return Ok(new
