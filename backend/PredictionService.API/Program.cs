@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using PredictionService.API.Data;
+using PredictionService.API.Repositories;
 using PredictionService.API.Services;
 
 
@@ -19,7 +20,8 @@ builder.Services.AddCors(options =>
 
 
 builder.Services.AddControllers();
-
+builder.Services.AddSingleton<ChatbotXmlRepository>();
+builder.Services.AddScoped<ChatbotService>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -38,7 +40,7 @@ builder.Services.AddScoped<ChatbotService>();
 var app = builder.Build();
 
 
-if(app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
