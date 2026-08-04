@@ -1,35 +1,35 @@
-using Microsoft.EntityFrameworkCore;
-using ReportingService.API.Data;
 using ReportingService.API.Models;
 using ReportingService.API.DTOs;
+using ReportingService.API.Repositories;
 
 namespace ReportingService.API.Services;
 
 public class ReportService
 {
-    private readonly AppDbContext context;
+    private readonly ReportRepository repository;
 
-    public ReportService(AppDbContext context)
+    public ReportService(
+        ReportRepository repository)
     {
-        this.context = context;
+        this.repository = repository;
     }
 
-    // Weekly Calendar View
 
-    public List<WeeklyReportDto> GetWeeklyReport(DateTime startDate)
+    // Weekly Calendar Report
+    public List<WeeklyReportDto> GetWeeklyReport(
+        DateTime startDate)
     {
         List<WeeklyReportDto> report = new();
 
+
         for (int i = 0; i < 7; i++)
         {
-            DateTime current = startDate.Date.AddDays(i);
+            DateTime current =
+                startDate.Date.AddDays(i);
 
-            var bookings = context.Bookings
-                .Include(x => x.Route)
-                .Include(x => x.Schedule)
-                .Include(x => x.SpecialRequests)
-                .Where(x => x.Schedule.TravelDate.Date == current)
-                .ToList();
+
+            var bookings =
+                repository.GetBookingsByDate(current);
 
             WeeklyReportDto day = new()
             {
@@ -39,20 +39,30 @@ public class ReportService
 
             foreach (var booking in bookings)
             {
-                day.Bookings.Add(new WeeklyBookingDto
-                {
-                    BookingId = booking.Id,
-                    Route = booking.Route.DepartureStation +
-                            " → " +
-                            booking.Route.DestinationStation,
+                day.Bookings.Add(
+                    new WeeklyBookingDto
+                    {
+                        BookingId = booking.Id,
 
-                    SeatNumber = booking.SeatNumber,
-                    TicketPrice = booking.TicketPrice,
+                        Route =
+                        booking.Route.DepartureStation
+                        + " → " +
+                        booking.Route.DestinationStation,
 
-                    SpecialRequests = booking.SpecialRequests
+
+                        SeatNumber =
+                        booking.SeatNumber,
+
+
+                        TicketPrice =
+                        booking.TicketPrice,
+
+
+                        SpecialRequests =
+                        booking.SpecialRequests
                         .Select(x => x.Description)
                         .ToList()
-                });
+                    });
             }
 
             report.Add(day);
@@ -61,118 +71,145 @@ public class ReportService
         return report;
     }
 
-    // Booking report with filters
 
+
+    // Booking Report Filtering
     public List<Booking> GetBookingReport(
         DateTime fromDate,
         DateTime toDate,
         string? route,
         BookingType? bookingType)
     {
-        var query = context.Bookings
-            .Include(x => x.Route)
-            .Include(x => x.Schedule)
-            .Include(x => x.SpecialRequests)
+
+        var query =
+            repository.GetBookingsBetweenDates(
+                fromDate,
+                toDate)
             .AsQueryable();
 
-        query = query.Where(x =>
-            x.Schedule.TravelDate >= fromDate &&
-            x.Schedule.TravelDate <= toDate);
 
         if (!string.IsNullOrWhiteSpace(route))
         {
-            query = query.Where(x =>
-                x.Route.DepartureStation.Contains(route) ||
+            query =
+                query.Where(x =>
+                x.Route.DepartureStation.Contains(route)
+                ||
                 x.Route.DestinationStation.Contains(route));
         }
 
         if (bookingType != null)
         {
-            query = query.Where(x =>
+            query =
+                query.Where(x =>
                 x.BookingType == bookingType);
         }
 
         return query.ToList();
     }
 
-    // Route frequency
 
-    public Dictionary<string, int> GetRouteFrequency(
-        DateTime fromDate,
-        DateTime toDate)
+    // Route Frequency
+    public Dictionary<string, int>
+        GetRouteFrequency(
+            DateTime fromDate,
+            DateTime toDate)
     {
-        return context.Bookings
-            .Include(x => x.Route)
-            .Include(x => x.Schedule)
-            .Where(x =>
-                x.Schedule.TravelDate >= fromDate &&
-                x.Schedule.TravelDate <= toDate)
+
+        return repository
+            .GetBookingsBetweenDates(
+                fromDate,
+                toDate)
+
             .GroupBy(x =>
-                x.Route.DepartureStation +
-                " → " +
+                x.Route.DepartureStation
+                +
+                " → "
+                +
                 x.Route.DestinationStation)
+
             .ToDictionary(
                 x => x.Key,
                 x => x.Count());
+
     }
 
-    // Total expenditure
 
+    // Total expenditure
     public decimal GetTotalExpenditure(
         DateTime fromDate,
         DateTime toDate)
     {
-        return context.Bookings
-            .Include(x => x.Schedule)
-            .Where(x =>
-                x.Schedule.TravelDate >= fromDate &&
-                x.Schedule.TravelDate <= toDate)
+
+        return repository
+            .GetBookingsBetweenDates(
+                fromDate,
+                toDate)
+
             .Sum(x => x.TicketPrice);
+
     }
 
-    // Selected booking cost
 
+    // Selected Booking Cost
     public decimal GetSelectedBookingsCost(
         List<int> bookingIds)
     {
-        return context.Bookings
-            .Where(x => bookingIds.Contains(x.Id))
-            .Sum(x => x.TicketPrice);
+
+        return repository
+            .GetBookingsByIds(bookingIds)
+
+            .Sum(x =>
+                x.TicketPrice);
+
     }
 
-    // Dashboard summary
-
-    public WeeklyReportSummaryDto GetWeeklySummary(
-        DateTime startDate)
+    // Dashboard Summary
+    public WeeklyReportSummaryDto
+        GetWeeklySummary(
+            DateTime startDate)
     {
-        DateTime endDate = startDate.AddDays(6);
 
-        var bookings = context.Bookings
-            .Include(x => x.Route)
-            .Include(x => x.Schedule)
-            .Include(x => x.SpecialRequests)
-            .Where(x =>
-                x.Schedule.TravelDate.Date >= startDate.Date &&
-                x.Schedule.TravelDate.Date <= endDate.Date)
-            .ToList();
+        DateTime endDate =
+            startDate.AddDays(6);
+
+        var bookings =
+            repository.GetBookingsBetweenDates(
+                startDate,
+                endDate);
 
         return new WeeklyReportSummaryDto
         {
-            TotalBookings = bookings.Count,
 
-            TotalTicketCost = bookings.Sum(x => x.TicketPrice),
+            TotalBookings =
+                bookings.Count,
 
-            TotalSpecialRequests = bookings.Sum(x =>
-                x.SpecialRequests.Count),
+            TotalTicketCost =
+                bookings.Sum(
+                    x => x.TicketPrice),
 
-            MostPopularRoute = bookings
+            TotalSpecialRequests =
+                bookings.Sum(
+                    x =>
+                    x.SpecialRequests.Count),
+
+            MostPopularRoute =
+                bookings
                 .GroupBy(x =>
-                    x.Route.DepartureStation +
-                    " → " +
+                    x.Route.DepartureStation
+                    +
+                    " → "
+                    +
                     x.Route.DestinationStation)
-                .OrderByDescending(x => x.Count())
-                .Select(x => x.Key)
-                .FirstOrDefault() ?? "No Bookings"
+
+                .OrderByDescending(
+                    x => x.Count())
+
+                .Select(x =>
+                    x.Key)
+
+                .FirstOrDefault()
+                ??
+                "No Bookings"
         };
     }
 }
