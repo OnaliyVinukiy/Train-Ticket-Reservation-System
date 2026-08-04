@@ -1,6 +1,12 @@
 import { useState } from "react";
 import { pdf } from "@react-pdf/renderer";
-import { getBookingReport, getRouteFrequency, exportCSV } from "../services/reportService";
+import {
+    getBookingReport,
+    getRouteFrequency,
+    startExport,
+    getExportStatus,
+    downloadExport
+} from "../services/reportService";
 import RouteFrequencyChart from "../components/report/RouteFrequencyChart";
 import ReportPDF from "../components/report/ReportPdf";
 
@@ -12,6 +18,8 @@ function Reports() {
     const [bookingType, setBookingType] = useState("");
     const [bookings, setBookings] = useState<any[]>([]);
     const [routeFrequency, setRouteFrequency] = useState<any[]>([]);
+    const [exporting, setExporting] = useState(false);
+    const [exportMessage, setExportMessage] = useState("");
 
     const generateReport = async () => {
         const data = await getBookingReport(fromDate, toDate, route, bookingType);
@@ -35,6 +43,34 @@ function Reports() {
         link.download = `report_${fromDate}_${toDate}.pdf`;
         link.click();
         URL.revokeObjectURL(link.href);
+    };
+
+    const exportCSV = async () => {
+        try {
+            setExporting(true);
+            setExportMessage("Generating report...");
+            const response = await startExport();
+            const jobId = response.jobId;
+            const interval = setInterval(async () => {
+                const status = await getExportStatus(jobId);
+                if (status.status === "Completed") {
+                    clearInterval(interval);
+                    setExportMessage("Report ready. Downloading...");
+                    await downloadExport(jobId);
+                    setExporting(false);
+                    setExportMessage("Export completed");
+                }
+                if (status.status.startsWith("Failed")) {
+                    clearInterval(interval);
+                    setExporting(false);
+                    setExportMessage(status.status);
+                }
+            }, 3000);
+        } catch (error) {
+            console.error(error);
+            setExporting(false);
+            setExportMessage("Export failed");
+        }
     };
 
     return (
@@ -88,9 +124,18 @@ function Reports() {
                         <button onClick={generateReport} className="bg-blue-600 text-white px-6 py-3 rounded-xl">
                             Generate Report
                         </button>
-                        <button onClick={() => exportCSV(fromDate, toDate)} className="bg-green-600 text-white px-6 py-3 rounded-xl">
-                            Export CSV
+                        <button
+                            onClick={exportCSV}
+                            disabled={exporting}
+                            className="bg-green-600 text-white px-6 py-3 rounded-xl disabled:bg-gray-400"
+                        >
+                            {exporting ? "Generating..." : "Export CSV"}
                         </button>
+                        {exportMessage && (
+                            <p className="mt-4 text-sm text-gray-600">
+                                {exportMessage}
+                            </p>
+                        )}
                         <button
                             onClick={exportPDF}
                             className="bg-red-600 text-white px-6 py-3 rounded-xl"
