@@ -19,16 +19,18 @@ public class ScheduleController : ControllerBase
 
 
     [HttpGet]
-    public IActionResult GetSchedules()
+    public async Task<IActionResult> GetSchedules()
     {
-        return Ok(service.GetSchedules());
+        var schedules = await service.GetSchedules();
+
+        return Ok(schedules);
     }
 
 
     [HttpGet("{id}")]
-    public IActionResult GetSchedule(int id)
+    public async Task<IActionResult> GetSchedule(int id)
     {
-        var schedule = service.GetSchedule(id);
+        var schedule = await service.GetSchedule(id);
 
 
         if (schedule == null)
@@ -45,17 +47,19 @@ public class ScheduleController : ControllerBase
 
 
     [HttpPost]
-    public IActionResult CreateSchedule(
+    public async Task<IActionResult> CreateSchedule(
         Schedule schedule)
     {
-        return Ok(
-            service.CreateSchedule(schedule)
-        );
+        var created =
+            await service.CreateSchedule(schedule);
+
+
+        return Ok(created);
     }
 
 
     [HttpPut("{id}")]
-    public IActionResult UpdateSchedule(
+    public async Task<IActionResult> UpdateSchedule(
         int id,
         Schedule schedule)
     {
@@ -68,7 +72,8 @@ public class ScheduleController : ControllerBase
         }
 
 
-        var existing = service.GetSchedule(id);
+        var existing =
+            await service.GetSchedule(id);
 
 
         if (existing == null)
@@ -80,7 +85,7 @@ public class ScheduleController : ControllerBase
         }
 
 
-        service.UpdateSchedule(schedule);
+        await service.UpdateSchedule(schedule);
 
 
         return NoContent();
@@ -88,9 +93,10 @@ public class ScheduleController : ControllerBase
 
 
     [HttpDelete("{id}")]
-    public IActionResult DeleteSchedule(int id)
+    public async Task<IActionResult> DeleteSchedule(int id)
     {
-        var schedule = service.GetSchedule(id);
+        var schedule =
+            await service.GetSchedule(id);
 
 
         if (schedule == null)
@@ -102,7 +108,7 @@ public class ScheduleController : ControllerBase
         }
 
 
-        service.DeleteSchedule(id);
+        await service.DeleteSchedule(id);
 
 
         return NoContent();
