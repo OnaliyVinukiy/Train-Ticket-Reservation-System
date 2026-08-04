@@ -11,10 +11,12 @@ namespace ReportingService.API.Controllers;
 public class ReportController : ControllerBase
 {
     private readonly ReportService service;
+    private readonly ReportExportWorker worker;
 
-    public ReportController(ReportService service)
+    public ReportController(ReportService service, ReportExportWorker worker)
     {
         this.service = service;
+        this.worker = worker;
     }
 
     [HttpGet("weekly")]
@@ -91,46 +93,39 @@ public class ReportController : ControllerBase
         );
     }
 
-    [HttpGet("export")]
-    public IActionResult ExportCSV(
-        DateTime fromDate,
-        DateTime toDate)
+
+    [HttpPost("export/start")]
+    public IActionResult StartExport()
     {
-        var bookings = service.GetBookingReport(
-            fromDate,
-            toDate,
-            null,
-            null);
 
-        using var memoryStream = new MemoryStream();
+        var jobId =
+            worker.QueueExport();
 
-        using var writer = new StreamWriter(memoryStream);
 
-        using var csv = new CsvWriter(
-            writer,
-            CultureInfo.InvariantCulture);
+        return Ok(new
+        {
+            Message =
+            "Report generation started",
 
-        csv.WriteRecords(
-            bookings.Select(b => new
-            {
-                BookingId = b.Id,
-                Reference = b.BookingReference,
-                Route = $"{b.Route.DepartureStation} → {b.Route.DestinationStation}",
-                TravelDate = b.Schedule.TravelDate.ToShortDateString(),
-                Departure = b.Schedule.DepartureTime,
-                Arrival = b.Schedule.ArrivalTime,
-                Seat = b.SeatNumber,
-                Price = b.TicketPrice,
-                BookingType = b.BookingType.ToString(),
-                Requests = string.Join(", ",
-                    b.SpecialRequests.Select(x => x.Description))
-            }));
+            JobId =
+            jobId
+        });
 
-        writer.Flush();
+    }
 
-        return File(
-            memoryStream.ToArray(),
-            "text/csv",
-            "booking-report.csv");
+
+    [HttpGet("export/status/{id}")]
+    public IActionResult ExportStatus(
+    Guid id)
+    {
+
+        var job =
+            worker.GetStatus(id);
+
+        if (job == null)
+            return NotFound();
+
+        return Ok(job);
+
     }
 }
