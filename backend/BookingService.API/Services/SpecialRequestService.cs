@@ -12,28 +12,30 @@ public class SpecialRequestService
         this.repository = repository;
     }
 
-    public List<SpecialRequest> GetRequests()
+    public async Task<List<SpecialRequest>> GetRequests()
     {
-        return repository.GetRequests();
+        return await repository.GetRequests();
     }
 
-    public SpecialRequest? GetRequest(int id)
+    public async Task<SpecialRequest?> GetRequest(int id)
     {
-        return repository.GetRequest(id);
+        return await repository.GetRequest(id);
     }
 
-    public SpecialRequest CreateRequest(SpecialRequest request)
+    public async Task<SpecialRequest> CreateRequest(
+        SpecialRequest request)
     {
-        return repository.CreateRequest(request);
+        return await repository.CreateRequest(request);
     }
 
-    public void UpdateRequest(SpecialRequest request)
+    public async Task UpdateRequest(
+        SpecialRequest request)
     {
-        repository.UpdateRequest(request);
+        await repository.UpdateRequest(request);
     }
 
-    public void DeleteRequest(int id)
+    public async Task DeleteRequest(int id)
     {
-        repository.DeleteRequest(id);
+        await repository.DeleteRequest(id);
     }
 }
