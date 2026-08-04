@@ -107,21 +107,24 @@ export const downloadExport = async (
     jobId: string
 ) => {
 
-    const response =
-        await reportApi.get(
-            `/report/export/download/${jobId}`,
-            {
-                responseType: "blob"
-            }
-        );
+    const response = await reportApi.get(
+        `/report/export/download/${jobId}`,
+        {
+            responseType: "blob"
+        }
+    );
+
+
+    const blob = new Blob(
+        [response.data],
+        {
+            type: "text/csv"
+        }
+    );
 
 
     const url =
-        window.URL.createObjectURL(
-            new Blob(
-                [response.data]
-            )
-        );
+        window.URL.createObjectURL(blob);
 
 
     const link =
@@ -130,8 +133,10 @@ export const downloadExport = async (
 
     link.href = url;
 
-    link.download =
-        "booking-report.csv";
+    link.setAttribute(
+        "download",
+        "booking-report.csv"
+    );
 
 
     document.body.appendChild(link);
@@ -139,7 +144,11 @@ export const downloadExport = async (
     link.click();
 
 
-    link.remove();
+    document.body.removeChild(link);
 
-    window.URL.revokeObjectURL(url);
+
+    setTimeout(() => {
+        window.URL.revokeObjectURL(url);
+    }, 100);
+
 };
