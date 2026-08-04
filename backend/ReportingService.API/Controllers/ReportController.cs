@@ -128,4 +128,12 @@ public class ReportController : ControllerBase
         return Ok(job);
 
     }
+
+    [HttpGet("configuration")]
+    public IActionResult GetConfiguration()
+    {
+        return Ok(
+            service.GetReportConfiguration()
+        );
+    }
 }
