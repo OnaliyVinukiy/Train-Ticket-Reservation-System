@@ -13,63 +13,52 @@ public class SpecialRequestRepository
         this.context = context;
     }
 
-
-    public List<SpecialRequest> GetRequests()
+    public async Task<List<SpecialRequest>> GetRequests()
     {
-        return context.SpecialRequests
+        return await context.SpecialRequests
             .AsNoTracking()
-            .ToList();
+            .ToListAsync();
     }
 
-
-    public SpecialRequest? GetRequest(int id)
+    public async Task<SpecialRequest?> GetRequest(int id)
     {
-        return context.SpecialRequests
-            .FirstOrDefault(x => x.Id == id);
+        return await context.SpecialRequests
+            .FirstOrDefaultAsync(x => x.Id == id);
     }
 
-
-    public SpecialRequest CreateRequest(SpecialRequest request)
+    public async Task<SpecialRequest> CreateRequest(SpecialRequest request)
     {
-        context.SpecialRequests.Add(request);
-        context.SaveChanges();
+        await context.SpecialRequests.AddAsync(request);
+        await context.SaveChangesAsync();
 
         return request;
     }
 
-
-    public void UpdateRequest(SpecialRequest request)
+    public async Task UpdateRequest(SpecialRequest request)
     {
-        var existingRequest =
-            context.SpecialRequests
-            .FirstOrDefault(x => x.Id == request.Id);
-
+        var existingRequest = await context.SpecialRequests
+            .FirstOrDefaultAsync(x => x.Id == request.Id);
 
         if (existingRequest == null)
         {
             return;
         }
 
-
         existingRequest.Description =
             request.Description;
 
-
-        context.SaveChanges();
+        await context.SaveChangesAsync();
     }
 
-
-    public void DeleteRequest(int id)
+    public async Task DeleteRequest(int id)
     {
-        var request =
-            context.SpecialRequests
-            .FirstOrDefault(x => x.Id == id);
-
+        var request = await context.SpecialRequests
+            .FirstOrDefaultAsync(x => x.Id == id);
 
         if (request != null)
         {
             context.SpecialRequests.Remove(request);
-            context.SaveChanges();
+            await context.SaveChangesAsync();
         }
     }
 }
