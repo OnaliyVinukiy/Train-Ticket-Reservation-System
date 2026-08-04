@@ -1,33 +1,32 @@
 using System.Xml.Linq;
-using PredictionService.API.Models;
+using Microsoft.AspNetCore.Hosting;
 
 namespace PredictionService.API.Repositories;
 
 public class ChatbotXmlRepository
 {
+    private readonly string filePath;
 
-    private readonly string filePath =
-        "XML/ChatbotKnowledge.xml";
+    public ChatbotXmlRepository(IWebHostEnvironment environment)
+    {
+        filePath = Path.Combine(
+            environment.ContentRootPath,
+            "XML",
+            "ChatbotKnowledge.xml"
+        );
+    }
 
 
     public string? FindAnswer(string message)
     {
+        var document = XDocument.Load(filePath);
 
-        var document =
-            XDocument.Load(filePath);
+        var items = document.Descendants("Item");
 
-
-        var items =
-            document.Descendants("Item");
-
-
-        foreach(var item in items)
+        foreach (var item in items)
         {
-
             var keywords =
-                item.Element("Keywords")?.Value
-                ?? "";
-
+                item.Element("Keywords")?.Value ?? "";
 
             var words =
                 keywords.Split(
@@ -35,9 +34,9 @@ public class ChatbotXmlRepository
                     StringSplitOptions.RemoveEmptyEntries);
 
 
-            foreach(var word in words)
+            foreach (var word in words)
             {
-                if(message.Contains(
+                if (message.Contains(
                     word,
                     StringComparison.OrdinalIgnoreCase))
                 {
