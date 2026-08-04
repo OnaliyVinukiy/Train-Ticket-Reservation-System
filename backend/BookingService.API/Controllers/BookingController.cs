@@ -20,9 +20,9 @@ public class BookingController : ControllerBase
 
 
     [HttpGet]
-    public IActionResult GetBookings()
+    public async Task<IActionResult> GetBookings()
     {
-        var bookings = service.GetAllBookings();
+        var bookings = await service.GetAllBookings();
 
         return Ok(
             bookings.Select(BookingMapper.ToDto)
@@ -31,9 +31,9 @@ public class BookingController : ControllerBase
 
 
     [HttpGet("{id}")]
-    public IActionResult GetBooking(int id)
+    public async Task<IActionResult> GetBooking(int id)
     {
-        var booking = service.GetBookingById(id);
+        var booking = await service.GetBookingById(id);
 
 
         if (booking == null)
@@ -52,8 +52,8 @@ public class BookingController : ControllerBase
 
 
     [HttpPost]
-    public IActionResult CreateBooking(
-    BookingDto dto)
+    public async Task<IActionResult> CreateBooking(
+        BookingDto dto)
     {
         var booking =
             BookingMapper.ToModel(dto);
@@ -77,7 +77,7 @@ public class BookingController : ControllerBase
 
 
             var generated =
-                service.GenerateRecurringBookings(recurringBooking);
+                await service.GenerateRecurringBookings(recurringBooking);
 
 
             return Ok(new
@@ -88,8 +88,9 @@ public class BookingController : ControllerBase
             });
         }
 
+
         var created =
-            service.CreateBooking(booking);
+            await service.CreateBooking(booking);
 
 
         return CreatedAtAction(
@@ -103,13 +104,14 @@ public class BookingController : ControllerBase
     }
 
 
+
     [HttpPut("{id}")]
-    public IActionResult UpdateBooking(
+    public async Task<IActionResult> UpdateBooking(
         int id,
         BookingDto dto)
     {
         var existing =
-            service.GetBookingById(id);
+            await service.GetBookingById(id);
 
 
         if (existing == null)
@@ -128,19 +130,20 @@ public class BookingController : ControllerBase
         booking.Id = id;
 
 
-        service.UpdateBooking(booking);
+        await service.UpdateBooking(booking);
 
 
         return NoContent();
     }
 
 
+
     [HttpDelete("{id}")]
-    public IActionResult DeleteBooking(
+    public async Task<IActionResult> DeleteBooking(
         int id)
     {
         var booking =
-            service.GetBookingById(id);
+            await service.GetBookingById(id);
 
 
         if (booking == null)
@@ -152,20 +155,22 @@ public class BookingController : ControllerBase
         }
 
 
-        service.DeleteBooking(id);
+        await service.DeleteBooking(id);
+
 
         return NoContent();
     }
 
 
+
     [HttpGet("search")]
-    public IActionResult SearchBookings(
+    public async Task<IActionResult> SearchBookings(
         string? date,
         string? route,
         string? reference)
     {
         var bookings =
-            service.SearchBookings(
+            await service.SearchBookings(
                 date,
                 route,
                 reference
