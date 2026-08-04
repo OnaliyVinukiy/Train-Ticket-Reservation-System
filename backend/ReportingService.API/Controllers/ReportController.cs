@@ -136,4 +136,27 @@ public class ReportController : ControllerBase
             service.GetReportConfiguration()
         );
     }
+
+    [HttpGet("export/download/{id}")]
+public IActionResult DownloadExport(Guid id)
+{
+    var filePath = worker.GetFilePath(id);
+
+    if (filePath == null)
+        return NotFound("Report is not completed yet");
+
+
+    if (!System.IO.File.Exists(filePath))
+        return NotFound("File does not exist");
+
+
+    var bytes = System.IO.File.ReadAllBytes(filePath);
+
+
+    return File(
+        bytes,
+        "text/csv",
+        Path.GetFileName(filePath)
+    );
+}
 }
