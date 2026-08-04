@@ -7,11 +7,13 @@ namespace ReportingService.API.Services;
 public class ReportService
 {
     private readonly ReportRepository repository;
+    private readonly XmlReportConfigurationRepository xmlRepository;
 
     public ReportService(
-        ReportRepository repository)
+        ReportRepository repository, XmlReportConfigurationRepository xmlRepository)
     {
         this.repository = repository;
+        this.xmlRepository = xmlRepository;
     }
 
 
@@ -211,5 +213,10 @@ public class ReportService
                 ??
                 "No Bookings"
         };
+    }
+
+    public ReportConfiguration GetReportConfiguration()
+    {
+        return xmlRepository.GetConfiguration();
     }
 }
