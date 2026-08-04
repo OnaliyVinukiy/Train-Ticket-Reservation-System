@@ -8,67 +8,52 @@ public class BookingRepository
 {
     private readonly AppDbContext context;
 
-
-    public BookingRepository(
-        AppDbContext context)
+    public BookingRepository(AppDbContext context)
     {
         this.context = context;
     }
 
-
-    public List<Booking> GetAllBookings()
+    public async Task<List<Booking>> GetAllBookings()
     {
-        return context.Bookings
+        return await context.Bookings
             .Include(b => b.Route)
             .Include(b => b.Schedule)
             .Include(b => b.SpecialRequests)
-            .ToList();
+            .ToListAsync();
     }
 
-
-    public Booking? GetBooking(int id)
+    public async Task<Booking?> GetBooking(int id)
     {
-        return context.Bookings
+        return await context.Bookings
             .Include(b => b.Route)
             .Include(b => b.Schedule)
             .Include(b => b.SpecialRequests)
-            .FirstOrDefault(b => b.Id == id);
+            .FirstOrDefaultAsync(b => b.Id == id);
     }
 
-
-    public Booking CreateBooking(
-        Booking booking)
+    public async Task<Booking> CreateBooking(Booking booking)
     {
-        context.Bookings.Add(booking);
-
-        context.SaveChanges();
+        await context.Bookings.AddAsync(booking);
+        await context.SaveChangesAsync();
 
         return booking;
     }
 
-
-    public void UpdateBooking(Booking booking)
+    public async Task UpdateBooking(Booking booking)
     {
-        var existingBooking = context.Bookings
+        var existingBooking = await context.Bookings
             .Include(b => b.Route)
             .Include(b => b.Schedule)
             .Include(b => b.SpecialRequests)
-            .FirstOrDefault(b => b.Id == booking.Id);
-
+            .FirstOrDefaultAsync(b => b.Id == booking.Id);
 
         if (existingBooking == null)
             return;
 
         // Update booking details
-        existingBooking.SeatNumber =
-            booking.SeatNumber;
-
-        existingBooking.TicketPrice =
-            booking.TicketPrice;
-
-        existingBooking.BookingType =
-            booking.BookingType;
-
+        existingBooking.SeatNumber = booking.SeatNumber;
+        existingBooking.TicketPrice = booking.TicketPrice;
+        existingBooking.BookingType = booking.BookingType;
 
         // Update route
         existingBooking.Route.DepartureStation =
@@ -76,8 +61,6 @@ public class BookingRepository
 
         existingBooking.Route.DestinationStation =
             booking.Route.DestinationStation;
-
-
 
         // Update schedule
         existingBooking.Schedule.TravelDate =
@@ -89,44 +72,29 @@ public class BookingRepository
         existingBooking.Schedule.ArrivalTime =
             booking.Schedule.ArrivalTime;
 
-
-        // -----------------------------
-        // Update Special Requests
-        // -----------------------------
-
-        // Remove unchecked requests
-        var removedRequests =
-            existingBooking.SpecialRequests
+        // Remove deleted requests
+        var removedRequests = existingBooking.SpecialRequests
             .Where(existing =>
-                !booking.SpecialRequests
-                .Any(updated =>
-                    updated.Id == existing.Id))
+                !booking.SpecialRequests.Any(updated => updated.Id == existing.Id))
             .ToList();
-
 
         foreach (var request in removedRequests)
         {
             context.SpecialRequests.Remove(request);
         }
 
-
-        // Update existing and add new requests
+        // Update existing requests and add new ones
         foreach (var request in booking.SpecialRequests)
         {
-            var existingRequest =
-                existingBooking.SpecialRequests
+            var existingRequest = existingBooking.SpecialRequests
                 .FirstOrDefault(x => x.Id == request.Id);
-
 
             if (existingRequest != null)
             {
-                // Existing request edited
-                existingRequest.Description =
-                    request.Description;
+                existingRequest.Description = request.Description;
             }
             else
             {
-                // New request added
                 existingBooking.SpecialRequests.Add(
                     new SpecialRequest
                     {
@@ -135,38 +103,32 @@ public class BookingRepository
             }
         }
 
-        context.SaveChanges();
+        await context.SaveChangesAsync();
     }
 
-    public void DeleteBooking(
-        int id)
+    public async Task DeleteBooking(int id)
     {
-        var booking =
-            context.Bookings
-            .FirstOrDefault(x => x.Id == id);
-
+        var booking = await context.Bookings
+            .FirstOrDefaultAsync(x => x.Id == id);
 
         if (booking != null)
         {
             context.Bookings.Remove(booking);
-            context.SaveChanges();
+            await context.SaveChangesAsync();
         }
     }
 
-    public bool BookingExists(
+    public async Task<bool> BookingExists(
         DateTime date,
         string departure,
         string destination)
     {
-        return context.Bookings
+        return await context.Bookings
             .Include(b => b.Route)
             .Include(b => b.Schedule)
-            .Any(b =>
-                b.Schedule.TravelDate.Date == date.Date
-                &&
-                b.Route.DepartureStation == departure
-                &&
-                b.Route.DestinationStation == destination
-            );
+            .AnyAsync(b =>
+                b.Schedule.TravelDate.Date == date.Date &&
+                b.Route.DepartureStation == departure &&
+                b.Route.DestinationStation == destination);
     }
 }
