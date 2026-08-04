@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ReportConfiguration>
+
+  <CompanyName>
+    Train Reservation System
+  </CompanyName>
+
+  <Currency>
+    LKR
+  </Currency>
+
+  <DefaultExportFormat>
+    CSV
+  </DefaultExportFormat>
+
+  <Reports>
+
+    <Report>
+      <Name>
+        Weekly Booking Report
+      </Name>
+
+      <Description>
+        Displays booking information grouped by travel date
+      </Description>
+    </Report>
+
+
+    <Report>
+      <Name>
+        Route Frequency Report
+      </Name>
+
+      <Description>
+        Shows most frequently used train routes
+      </Description>
+    </Report>
+
+  </Reports>
+
+</ReportConfiguration>
