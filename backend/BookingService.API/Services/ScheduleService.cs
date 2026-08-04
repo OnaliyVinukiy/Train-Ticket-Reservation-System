@@ -12,28 +12,28 @@ public class ScheduleService
         this.repository = repository;
     }
 
-    public List<Schedule> GetSchedules()
+    public async Task<List<Schedule>> GetSchedules()
     {
-        return repository.GetSchedules();
+        return await repository.GetSchedules();
     }
 
-    public Schedule? GetSchedule(int id)
+    public async Task<Schedule?> GetSchedule(int id)
     {
-        return repository.GetSchedule(id);
+        return await repository.GetSchedule(id);
     }
 
-    public Schedule CreateSchedule(Schedule schedule)
+    public async Task<Schedule> CreateSchedule(Schedule schedule)
     {
-        return repository.CreateSchedule(schedule);
+        return await repository.CreateSchedule(schedule);
     }
 
-    public void UpdateSchedule(Schedule schedule)
+    public async Task UpdateSchedule(Schedule schedule)
     {
-        repository.UpdateSchedule(schedule);
+        await repository.UpdateSchedule(schedule);
     }
 
-    public void DeleteSchedule(int id)
+    public async Task DeleteSchedule(int id)
     {
-        repository.DeleteSchedule(id);
+        await repository.DeleteSchedule(id);
     }
 }
