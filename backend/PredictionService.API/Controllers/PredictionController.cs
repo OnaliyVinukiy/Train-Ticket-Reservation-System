@@ -20,16 +20,18 @@ public class PredictionController : ControllerBase
 
 
     [HttpGet]
-    public IActionResult Predict(
-        string route,
-        DateTime travelDate,
-        string departureTime)
+    [HttpGet]
+    public async Task<IActionResult> Predict(
+    string route,
+    DateTime travelDate,
+    string departureTime)
     {
         PredictionResponseDto result =
-            service.Predict(
+            await service.Predict(
                 route,
                 travelDate,
                 departureTime);
+
 
         return Ok(result);
     }
