@@ -1,6 +1,7 @@
 using System.Text.RegularExpressions;
 using PredictionService.API.Models;
 using PredictionService.API.DTOs;
+using PredictionService.API.Repositories;
 
 
 namespace PredictionService.API.Services;
@@ -8,15 +9,28 @@ namespace PredictionService.API.Services;
 public class ChatbotService
 {
     private readonly PredictionManagementService predictionService;
+    private readonly ChatbotXmlRepository xmlRepository;
 
-    public ChatbotService(PredictionManagementService predictionService)
+    public ChatbotService(PredictionManagementService predictionService, ChatbotXmlRepository xmlRepository)
     {
         this.predictionService = predictionService;
+        this.xmlRepository = xmlRepository;
     }
 
     public async Task<ChatbotResponseDto> ProcessMessage(string message)
     {
         message = message.Trim();
+        var xmlAnswer =
+        xmlRepository.FindAnswer(message);
+
+        if (xmlAnswer != null)
+        {
+            return new ChatbotResponseDto
+            {
+                Reply = xmlAnswer
+            };
+        }
+
         ChatIntent intent = DetectIntent(message);
 
         switch (intent)
