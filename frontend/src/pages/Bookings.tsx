@@ -80,7 +80,7 @@ function Bookings() {
                   Search
                 </button>
                 <button onClick={clearSearch} className="flex-1 bg-gray-500 text-white rounded-xl py-3 hover:bg-gray-600">
-                  Clear.
+                  Clear
                 </button>
               </div>
             </div>
