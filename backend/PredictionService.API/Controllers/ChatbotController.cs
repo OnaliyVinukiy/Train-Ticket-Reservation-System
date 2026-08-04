@@ -16,9 +16,12 @@ public class ChatbotController : ControllerBase
     }
 
     [HttpPost]
-    public IActionResult Chat(ChatbotRequestDto request)
+    public async Task<IActionResult> Chat(
+    ChatbotRequestDto request)
     {
-        var response = service.ProcessMessage(request.Message);
+        var response =
+            await service.ProcessMessage(request.Message);
+
         return Ok(response);
     }
 }
