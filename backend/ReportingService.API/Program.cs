@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using ReportingService.API.Data;
+using ReportingService.API.Repositories;
 using ReportingService.API.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,6 +16,8 @@ builder.Services.AddCors(options =>
                 .AllowAnyMethod();
         });
 });
+
+builder.Services.AddScoped<ReportRepository>();
 
 builder.Services.AddControllers();
 
