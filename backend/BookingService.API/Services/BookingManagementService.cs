@@ -6,55 +6,47 @@ namespace BookingService.API.Services;
 public class BookingManagementService
 {
     private readonly BookingRepository repository;
-
     private readonly RecurringBookingService recurringService;
 
     public BookingManagementService(
-    BookingRepository repository,
-    RecurringBookingService recurringService)
+        BookingRepository repository,
+        RecurringBookingService recurringService)
     {
         this.repository = repository;
         this.recurringService = recurringService;
     }
 
-
-    public List<Booking> GetAllBookings()
+    public async Task<List<Booking>> GetAllBookings()
     {
-        return repository.GetAllBookings();
+        return await repository.GetAllBookings();
     }
 
-
-    public Booking? GetBookingById(int id)
+    public async Task<Booking?> GetBookingById(int id)
     {
-        return repository.GetBooking(id);
+        return await repository.GetBooking(id);
     }
 
-
-    public Booking CreateBooking(Booking booking)
+    public async Task<Booking> CreateBooking(Booking booking)
     {
-        return repository.CreateBooking(booking);
+        return await repository.CreateBooking(booking);
     }
 
-
-    public void UpdateBooking(Booking booking)
+    public async Task UpdateBooking(Booking booking)
     {
-        repository.UpdateBooking(booking);
+        await repository.UpdateBooking(booking);
     }
 
-
-    public void DeleteBooking(int id)
+    public async Task DeleteBooking(int id)
     {
-        repository.DeleteBooking(id);
+        await repository.DeleteBooking(id);
     }
 
-
-    public List<Booking> SearchBookings(
+    public async Task<List<Booking>> SearchBookings(
         string? date,
         string? route,
         string? reference)
     {
-        var bookings = repository.GetAllBookings();
-
+        var bookings = await repository.GetAllBookings();
 
         if (!string.IsNullOrWhiteSpace(date))
         {
@@ -66,7 +58,6 @@ public class BookingManagementService
                 .ToList();
         }
 
-
         if (!string.IsNullOrWhiteSpace(route))
         {
             bookings = bookings
@@ -77,7 +68,6 @@ public class BookingManagementService
                 .ToList();
         }
 
-
         if (!string.IsNullOrWhiteSpace(reference))
         {
             bookings = bookings
@@ -86,13 +76,12 @@ public class BookingManagementService
                 .ToList();
         }
 
-
         return bookings;
     }
 
-    public List<Booking> GenerateRecurringBookings(
-    RecurringBooking booking)
+    public async Task<List<Booking>> GenerateRecurringBookings(
+     RecurringBooking booking)
     {
-        return recurringService.GenerateRecurringBookings(booking);
+        return await recurringService.GenerateRecurringBookings(booking);
     }
 }
