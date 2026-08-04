@@ -14,7 +14,11 @@ public class PredictionManagementService
         this.context = context;
     }
 
-    public PredictionResponseDto Predict(string route, DateTime travelDate, string departureTime)
+
+    public async Task<PredictionResponseDto> Predict(
+        string route,
+        DateTime travelDate,
+        string departureTime)
     {
         var routeParts = route.Split("→");
 
@@ -30,103 +34,135 @@ public class PredictionManagementService
             };
         }
 
-        string departureStation = routeParts[0].Trim();
-        string destinationStation = routeParts[1].Trim();
+        string departureStation =
+            routeParts[0].Trim();
+
+        string destinationStation =
+            routeParts[1].Trim();
 
         // Historical bookings
-        var historicalBookings = context.Bookings
+        var historicalBookings =
+            await context.Bookings
             .Include(b => b.Route)
             .Include(b => b.Schedule)
             .Where(b =>
                 b.Route.DepartureStation == departureStation &&
                 b.Route.DestinationStation == destinationStation &&
                 b.Schedule.TravelDate < travelDate)
-            .ToList();
+            .ToListAsync();
 
-        int totalHistoricalBookings = historicalBookings.Count;
+        int totalHistoricalBookings =
+            historicalBookings.Count;
+
         double demandScore = 0;
+
         List<string> factors = new();
 
-        // Historical demand factor
-        demandScore += totalHistoricalBookings * 5;
-        factors.Add($"Historical demand: {totalHistoricalBookings} previous bookings");
 
-        // Future existing bookings
-        var upcomingBookings = context.Bookings
+        demandScore += totalHistoricalBookings * 5;
+
+        factors.Add(
+            $"Historical demand: {totalHistoricalBookings} previous bookings");
+
+
+        var upcomingBookings =
+            await context.Bookings
             .Include(b => b.Route)
             .Include(b => b.Schedule)
             .Where(b =>
                 b.Route.DepartureStation == departureStation &&
                 b.Route.DestinationStation == destinationStation &&
                 b.Schedule.TravelDate.Date == travelDate.Date)
-            .ToList();
+            .ToListAsync();
+
 
         demandScore += upcomingBookings.Count * 8;
+
         if (upcomingBookings.Count > 0)
         {
-            factors.Add($"{upcomingBookings.Count} existing bookings already made");
+            factors.Add(
+                $"{upcomingBookings.Count} existing bookings already made");
         }
 
-        // Peak hour analysis
-        if (TimeSpan.TryParse(departureTime, out TimeSpan time))
+
+        if (TimeSpan.TryParse(
+            departureTime,
+            out TimeSpan time))
         {
-            if ((time >= new TimeSpan(6, 0, 0) && time <= new TimeSpan(9, 0, 0)) ||
-                (time >= new TimeSpan(16, 0, 0) && time <= new TimeSpan(19, 0, 0)))
+            if (
+                (time >= new TimeSpan(6, 0, 0) &&
+                 time <= new TimeSpan(9, 0, 0))
+                ||
+                (time >= new TimeSpan(16, 0, 0) &&
+                 time <= new TimeSpan(19, 0, 0))
+            )
             {
                 demandScore += 20;
-                factors.Add("Peak travel time increases demand");
+
+                factors.Add(
+                    "Peak travel time increases demand");
             }
         }
 
-        // Weekend factor
-        if (travelDate.DayOfWeek == DayOfWeek.Saturday || travelDate.DayOfWeek == DayOfWeek.Sunday)
+
+        if (
+            travelDate.DayOfWeek == DayOfWeek.Saturday ||
+            travelDate.DayOfWeek == DayOfWeek.Sunday)
         {
             demandScore += 15;
-            factors.Add("Weekend travel increases demand");
+
+            factors.Add(
+                "Weekend travel increases demand");
         }
 
-        // Recurring booking factor
-        var recurringBookings = context.Bookings
+
+        var recurringBookings =
+            await context.Bookings
             .Where(b =>
                 b.BookingType == BookingType.Recurring &&
                 b.Route.DepartureStation == departureStation &&
                 b.Route.DestinationStation == destinationStation)
-            .Count();
+            .CountAsync();
+
 
         if (recurringBookings > 0)
         {
             demandScore += recurringBookings * 3;
-            factors.Add($"{recurringBookings} recurring passengers detected");
+
+            factors.Add(
+                $"{recurringBookings} recurring passengers detected");
         }
 
-        // Availability calculation
-        string availability;
-        if (demandScore >= 120)
-            availability = "Very Low availability";
-        else if (demandScore >= 80)
-            availability = "Low availability";
-        else if (demandScore >= 40)
-            availability = "Medium availability";
-        else
-            availability = "High availability";
 
-        // Price prediction
-        decimal averagePrice = historicalBookings.Any() ? historicalBookings.Average(x => x.TicketPrice) : 0;
+        string availability =
+            demandScore switch
+            {
+                >= 120 => "Very Low availability",
+                >= 80 => "Low availability",
+                >= 40 => "Medium availability",
+                _ => "High availability"
+            };
 
-        string priceTrend;
-        if (demandScore >= 80)
-            priceTrend = "Expected increase in ticket price due to high demand";
-        else if (demandScore >= 40)
-            priceTrend = "Possible slight price increase";
-        else
-            priceTrend = "Expected stable pricing";
 
-        // Recommendation
-        string recommendation;
-        if (demandScore >= 80)
-            recommendation = "High demand expected. Booking early is recommended.";
-        else
-            recommendation = "Seats are likely available. Normal booking time is acceptable.";
+        decimal averagePrice =
+            historicalBookings.Any()
+            ? historicalBookings.Average(x => x.TicketPrice)
+            : 0;
+
+
+        string priceTrend =
+            demandScore >= 80
+            ? "Expected increase in ticket price due to high demand"
+            : demandScore >= 40
+            ? "Possible slight price increase"
+            : "Expected stable pricing";
+
+
+        string recommendation =
+            demandScore >= 80
+            ? "High demand expected. Booking early is recommended."
+            : "Seats are likely available. Normal booking time is acceptable.";
+
 
         return new PredictionResponseDto
         {
