@@ -20,7 +20,6 @@ public class PredictionController : ControllerBase
 
 
     [HttpGet]
-    [HttpGet]
     public async Task<IActionResult> Predict(
     string route,
     DateTime travelDate,
