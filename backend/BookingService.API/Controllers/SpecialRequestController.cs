@@ -19,19 +19,22 @@ public class SpecialRequestController : ControllerBase
 
 
     [HttpGet]
-    public IActionResult GetRequests()
+    public async Task<IActionResult> GetRequests()
     {
-        return Ok(service.GetRequests());
+        var requests = await service.GetRequests();
+
+        return Ok(requests);
     }
 
 
     [HttpGet("{id}")]
-    public IActionResult GetRequest(int id)
+    public async Task<IActionResult> GetRequest(int id)
     {
-        var request = service.GetRequest(id);
+        var request =
+            await service.GetRequest(id);
 
 
-        if(request == null)
+        if (request == null)
         {
             return NotFound(new
             {
@@ -45,21 +48,23 @@ public class SpecialRequestController : ControllerBase
 
 
     [HttpPost]
-    public IActionResult CreateRequest(
+    public async Task<IActionResult> CreateRequest(
         SpecialRequest request)
     {
-        return Ok(
-            service.CreateRequest(request)
-        );
+        var created =
+            await service.CreateRequest(request);
+
+
+        return Ok(created);
     }
 
 
     [HttpPut("{id}")]
-    public IActionResult UpdateRequest(
+    public async Task<IActionResult> UpdateRequest(
         int id,
         SpecialRequest request)
     {
-        if(id != request.Id)
+        if (id != request.Id)
         {
             return BadRequest(new
             {
@@ -68,10 +73,11 @@ public class SpecialRequestController : ControllerBase
         }
 
 
-        var existing = service.GetRequest(id);
+        var existing =
+            await service.GetRequest(id);
 
 
-        if(existing == null)
+        if (existing == null)
         {
             return NotFound(new
             {
@@ -80,7 +86,7 @@ public class SpecialRequestController : ControllerBase
         }
 
 
-        service.UpdateRequest(request);
+        await service.UpdateRequest(request);
 
 
         return NoContent();
@@ -88,12 +94,13 @@ public class SpecialRequestController : ControllerBase
 
 
     [HttpDelete("{id}")]
-    public IActionResult DeleteRequest(int id)
+    public async Task<IActionResult> DeleteRequest(int id)
     {
-        var request = service.GetRequest(id);
+        var request =
+            await service.GetRequest(id);
 
 
-        if(request == null)
+        if (request == null)
         {
             return NotFound(new
             {
@@ -102,7 +109,7 @@ public class SpecialRequestController : ControllerBase
         }
 
 
-        service.DeleteRequest(id);
+        await service.DeleteRequest(id);
 
 
         return NoContent();
