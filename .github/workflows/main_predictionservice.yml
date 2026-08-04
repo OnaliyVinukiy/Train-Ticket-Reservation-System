@@ -7,6 +7,10 @@ on:
   push:
     branches:
       - main
+    paths:
+      - "backend/PredictionService.API/**"
+      - ".github/workflows/main_predictionservice.yml"
+
   workflow_dispatch:
 
 jobs:

@@ -7,6 +7,10 @@ on:
   push:
     branches:
       - main
+    paths:
+      - "backend/BookingService.API/**"
+      - ".github/workflows/main_bookingservice.yml"
+
   workflow_dispatch:
 
 jobs:
