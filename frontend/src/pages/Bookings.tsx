@@ -82,6 +82,7 @@ function Bookings() {
                 <button onClick={clearSearch} className="flex-1 bg-gray-500 text-white rounded-xl py-3 hover:bg-gray-600">
                   Clear
                 </button>
+                
               </div>
             </div>
             <BookingList bookings={bookings} onEdit={setEditingBooking} onDelete={handleDelete} />
