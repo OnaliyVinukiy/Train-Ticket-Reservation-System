@@ -15,7 +15,7 @@ const emptyBooking: Booking = {
     ticketPrice: 0,
     bookingType: BOOKING_TYPES.OneOff,
     recurrencePattern: RECURRENCE_PATTERNS.None,
-    recurrenceEndDate: "",
+    recurrenceEndDate: null,
     route: {
         departureStation: "",
         destinationStation: ""
@@ -410,11 +410,11 @@ function BookingForm({ onSubmit, editingBooking }: BookingFormProps) {
                                     id="recurrenceEndDate"
                                     className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition duration-200"
                                     type="date"
-                                    value={booking.recurrenceEndDate}
+                                    value={booking.recurrenceEndDate ?? ""}
                                     onChange={(e) =>
                                         setBooking({
                                             ...booking,
-                                            recurrenceEndDate: e.target.value
+                                            recurrenceEndDate: e.target.value || null
                                         })
                                     }
                                 />

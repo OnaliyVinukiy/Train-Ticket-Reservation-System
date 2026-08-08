@@ -30,7 +30,7 @@ export interface Booking {
     ticketPrice: number;
     bookingType: BookingType;
     recurrencePattern: RecurrencePattern;
-    recurrenceEndDate: string;
+    recurrenceEndDate: string | null;
     route: Route;
     schedule: Schedule;
     specialRequests: SpecialRequest[];
