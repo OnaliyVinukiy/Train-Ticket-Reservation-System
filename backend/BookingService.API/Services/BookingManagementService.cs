@@ -89,8 +89,6 @@ public class BookingManagementService
 
     private async Task ValidateBooking(Booking booking)
     {
-        if (string.IsNullOrWhiteSpace(booking.BookingReference))
-            throw new ArgumentException("Booking reference is required.");
 
         if (string.IsNullOrWhiteSpace(booking.SeatNumber))
             throw new ArgumentException("Seat number is required.");
